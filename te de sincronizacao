@@ -1,0 +1,14 @@
+[1mdiff --git a/app/routes/auth.py b/app/routes/auth.py[m
+[1mindex fcaa1c3..7135612 100644[m
+[1m--- a/app/routes/auth.py[m
+[1m+++ b/app/routes/auth.py[m
+[36m@@ -58,4 +58,6 @@[m [mdef dashboard(request: Request):[m
+         request=request,[m
+         name=template_name,[m
+         context={"user_name": user_name, "user_role": user_role}[m
+[31m-    )[m
+\ No newline at end of file[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    #teste commit[m
+\ No newline at end of file[m
