@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Socrático IA - Início</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold text-primary">Tutor Socrático IA</h1>
+            <p class="lead text-secondary">Etapa 2: Banco de Dados Conectado e Populado com Sucesso!</p>
+            <div class="badge bg-success fs-6 p-2 mb-3">Status: SQLite + SQLAlchemy Ativos</div>
+        </div>
+
+        <div class="card shadow-sm max-w-lg mx-auto" style="max-width: 650px;">
+            <div class="card-header bg-primary text-white fw-bold">
+                Usuários Pré-cadastrados no Banco de Dados
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Função</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td><code>{{ user.email }}</code></td>
+                            <td>
+                                <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'docente' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                    {{ user.role }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
