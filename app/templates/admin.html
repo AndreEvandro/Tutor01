@@ -1,20 +1,150 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8"><title>Painel Administrador</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Administrador - Tutor Socrático</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-dark bg-danger px-4">
-        <span class="navbar-brand fw-bold">Painel Administrador - Tutor Socrático</span>
-        <div>
-            <span class="text-white me-3">Olá, {{ user_name }}</span>
+    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm mb-4">
+        <span class="navbar-brand fw-bold text-white">Painel do Administrador - Tutor Socrático</span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white">Olá, <strong>{{ user_name }}</strong></span>
             <a href="/logout" class="btn btn-outline-light btn-sm">Sair</a>
         </div>
     </nav>
-    <div class="container py-5 text-center">
-        <h2>Gestão de Usuários e Configuração Global</h2>
-        <p class="lead text-muted">Painel do Administrador ativo e autenticado com sucesso.</p>
+
+    <div class="container pb-5">
+        <!-- Indicadores / Métricas do Sistema -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white p-3 shadow-sm">
+                    <h5>Total de Utilizadores</h5>
+                    <h2 class="mb-0 fw-bold">{{ users|length }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white p-3 shadow-sm">
+                    <h5>Atividades Criadas</h5>
+                    <h2 class="mb-0 fw-bold">{{ total_activities }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white p-3 shadow-sm">
+                    <h5>Interações Socráticas</h5>
+                    <h2 class="mb-0 fw-bold">{{ total_interactions }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Cadastro de Utilizadores -->
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white fw-bold">
+                        Cadastrar Novo Utilizador
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/user/create" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">Nome Completo</label>
+                                <input type="text" name="name" class="form-control" required placeholder="Ex: Maria Silva">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">E-mail</label>
+                                <input type="email" name="email" class="form-control" required placeholder="maria@tutor.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Palavra-passe</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Perfil de Acesso</label>
+                                <select name="role" class="form-select">
+                                    <option value="estudante">Estudante</option>
+                                    <option value="docente">Docente</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Criar Utilizador</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Configuração da API OpenAI -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark fw-bold">
+                        🔑 Configuração da API OpenAI
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-2">Chave atual: <code>{{ masked_key }}</code></p>
+                        <form action="/admin/config/api-key" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">Nova Chave (OPENAI_API_KEY)</label>
+                                <input type="password" name="api_key" class="form-control" placeholder="sk-proj-..." required>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100 btn-sm fw-bold">Atualizar Chave</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Utilizadores Registados -->
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">
+                        Utilizadores Registados no Sistema
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Perfil</th>
+                                    <th>Estado</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                <tr>
+                                    <td>{{ u.id }}</td>
+                                    <td><strong>{{ u.name }}</strong></td>
+                                    <td>{{ u.email }}</td>
+                                    <td>
+                                        {% if u.role == 'admin' %}
+                                            <span class="badge bg-dark">Admin</span>
+                                        {% elif u.role == 'docente' %}
+                                            <span class="badge bg-warning text-dark">Docente</span>
+                                        {% else %}
+                                            <span class="badge bg-info text-dark">Estudante</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if u.is_active %}
+                                            <span class="badge bg-success">Ativo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form action="/admin/user/toggle/{{ u.id }}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm {{ 'btn-outline-danger' if u.is_active else 'btn-outline-success' }}">
+                                                {{ 'Desativar' if u.is_active else 'Ativar' }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
