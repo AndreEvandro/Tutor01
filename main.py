@@ -1,9 +1,8 @@
 import os
 from contextlib import asynccontextmanager
-from dotenv import load_dotenv  # <-- Importado do python-dotenv
+from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente do arquivo .env antes de rodar o app
-load_dotenv()  # <-- Executado aqui
+load_dotenv()
 
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
@@ -13,21 +12,20 @@ from app.models.user import User
 from app.models.activity import Activity
 from app.routes import auth, admin, teacher, student
 
+# Declarar a versão semântica atual
+__version__ = "1.0.0"
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
-    
-    # Criar utilizadores pré-cadastrados se a base estiver vazia
     if db.query(User).count() == 0:
         admin_user = User(name="Administrador", email="admin@tutor.com", password="admin123", role="admin", is_active=True)
         teacher_user = User(name="Professor Carlos", email="docente@tutor.com", password="docente123", role="docente", is_active=True)
         student_user = User(name="Aluno Lucas", email="aluno@tutor.com", password="aluno123", role="estudante", is_active=True)
-        
         db.add_all([admin_user, teacher_user, student_user])
         db.commit()
 
-        # Criar atividade inicial com Régua Socrática Nível 6
         initial_activity = Activity(
             title="Estruturas Repetitivas (While / For)",
             subject="Programação I",
@@ -41,7 +39,12 @@ async def lifespan(app: FastAPI):
     db.close()
     yield
 
-app = FastAPI(title="Tutor Socrático IA", lifespan=lifespan)
+app = FastAPI(
+    title="Tutor Socrático IA",
+    version=__version__,  # Atualiza a versão na documentação /docs
+    lifespan=lifespan
+)
+
 app.add_middleware(SessionMiddleware, secret_key="chave_secreta_socratic_tutor_2026")
 
 app.include_router(auth.router)
