@@ -1,5 +1,10 @@
 import os
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv  # <-- Importado do python-dotenv
+
+# Carrega as variáveis de ambiente do arquivo .env antes de rodar o app
+load_dotenv()  # <-- Executado aqui
+
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
