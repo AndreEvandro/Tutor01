@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/teco/tutor-ia
+    - /bin/cp -R * $DEPLOYPATH
+    - $DEPLOYPATH/venv/bin/pip install -r $DEPLOYPATH/requirements.txt
+    - touch $DEPLOYPATH/tmp/restart.txt
