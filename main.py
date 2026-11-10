@@ -41,8 +41,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Tutor Socrático IA",
-    version=__version__,  # Atualiza a versão na documentação /docs
-    lifespan=lifespan
+    version=__version__,
+    lifespan=lifespan,
+    root_path="/tutor01"  # Indica ao FastAPI a URL base no servidor
 )
 
 app.add_middleware(SessionMiddleware, secret_key="chave_secreta_socratic_tutor_2026")
