@@ -25,6 +25,14 @@ def test_login_page_renders():
     assert response.status_code == 200
     assert "Tutor Socrático" in response.text
 
+def test_about_page_renders():
+    """Valida que a página Sobre renderiza corretamente com as informações acadêmicas."""
+    response = client.get("/sobre")
+    assert response.status_code == 200
+    assert "André Evandro Lourenço" in response.text
+    assert "SIN5006" in response.text
+    assert "Patrícia Rufino Oliveira" in response.text
+
 def test_socratic_pedagogy_controller():
     """Valida a lógica do controlador pedagógico (OpenAI real ou Simulador local)."""
     # Teste Nível 1 - Socrático Estrito

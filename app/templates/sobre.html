@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre o Projeto - Tutor Socrático IA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+        }
+        .hero-banner {
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+            color: #ffffff;
+            padding: 60px 20px 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo-container {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.35);
+        }
+        .credit-card {
+            border: 0;
+            border-radius: 14px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: #ffffff;
+        }
+        .credit-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+        }
+        .credit-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+        .feature-card {
+            border: 0;
+            border-radius: 12px;
+            background: #ffffff;
+            height: 100%;
+        }
+        .level-badge-pill {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra Superior -->
+    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="{{ back_url }}" class="navbar-brand fw-bold d-flex align-items-center gap-2 mb-0">
+                <span>🤖</span>
+                <span>Tutor Socrático IA</span>
+            </a>
+            <a href="{{ back_url }}" class="btn btn-outline-light btn-sm px-3 fw-bold">
+                ← Voltar
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Header -->
+    <header class="hero-banner text-center">
+        <div class="container" style="max-width: 820px;">
+            <div class="logo-container mb-3">
+                <svg viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="socraticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#4f46e5" />
+                            <stop offset="50%" stop-color="#06b6d4" />
+                            <stop offset="100%" stop-color="#3b82f6" />
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="2.5" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    <circle cx="50" cy="50" r="48" fill="#0f172a" stroke="url(#socraticGrad)" stroke-width="2.5" />
+                    <circle cx="50" cy="50" r="42" fill="#1e293b" opacity="0.6" />
+                    <rect x="24" y="72" width="52" height="4" rx="2" fill="url(#socraticGrad)" />
+                    <rect x="28" y="68" width="44" height="2.5" rx="1" fill="#94a3b8" opacity="0.8" />
+                    <rect x="30" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+                    <rect x="47.75" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+                    <rect x="65.5" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+                    <rect x="27" y="40" width="46" height="3" rx="1" fill="#cbd5e1" />
+                    <polygon points="50,18 25,37 75,37" fill="url(#socraticGrad)" opacity="0.35" />
+                    <polyline points="25,37 50,18 75,37" fill="none" stroke="url(#socraticGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="50" cy="22" r="3.5" fill="#38bdf8" filter="url(#glow)" />
+                    <circle cx="38" cy="30" r="2.5" fill="#60a5fa" />
+                    <circle cx="62" cy="30" r="2.5" fill="#818cf8" />
+                    <circle cx="50" cy="34" r="2.5" fill="#a78bfa" />
+                    <line x1="50" y1="22" x2="38" y2="30" stroke="#38bdf8" stroke-width="1.2" opacity="0.8" />
+                    <line x1="50" y1="22" x2="62" y2="30" stroke="#38bdf8" stroke-width="1.2" opacity="0.8" />
+                    <line x1="38" y1="30" x2="50" y2="34" stroke="#818cf8" stroke-width="1.2" opacity="0.8" />
+                    <line x1="62" y1="30" x2="50" y2="34" stroke="#818cf8" stroke-width="1.2" opacity="0.8" />
+                    <path d="M50 48 L52 53 L57 55 L52 57 L50 62 L48 57 L43 55 L48 53 Z" fill="#38bdf8" filter="url(#glow)" />
+                </svg>
+            </div>
+            <h2 class="fw-bold text-white mb-2">Tutor Socrático IA</h2>
+            <p class="lead text-light opacity-90 mb-0">
+                Plataforma Educacional de Ensino com Governança Pedagógica, Dialética Reflexiva e Monitoramento Metacognitivo.
+            </p>
+        </div>
+    </header>
+
+    <div class="container py-5" style="max-width: 980px;">
+        
+        <!-- CARD DESTAQUE: AUTORIA E VÍNCULO ACADÊMICO -->
+        <div class="card credit-card shadow-sm p-4 mb-5 border-start border-4 border-primary">
+            <h5 class="fw-bold text-primary mb-3 text-uppercase small tracking-wider">
+                🎓 Créditos Acadêmicos & Autoria
+            </h5>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <div class="credit-icon bg-primary bg-opacity-10 text-primary me-3">
+                            👨‍🏫
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Desenvolvedor</span>
+                            <h6 class="fw-bold text-dark mb-0">Prof. Me. André Evandro Lourenço</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <div class="credit-icon bg-info bg-opacity-10 text-info me-3">
+                            🏛️
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Disciplina</span>
+                            <h6 class="fw-bold text-dark mb-0">SIN5006 - Inteligência Computacional</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <div class="credit-icon bg-success bg-opacity-10 text-success me-3">
+                            👩‍🏫
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Docente Responsável</span>
+                            <h6 class="fw-bold text-dark mb-0">Profa. Dra. Patrícia Rufino Oliveira</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: PROPOSTA PEDAGÓGICA E CONCEITO -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card feature-card shadow-sm p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="fs-4">🏛️</span>
+                        <h5 class="fw-bold text-dark mb-0">O Método Socrático na Era da IA</h5>
+                    </div>
+                    <p class="text-secondary small mb-3 leading-relaxed">
+                        Ao contrário dos assistentes generativos convencionais que entregam o código pronto de imediato, o <strong>Tutor Socrático IA</strong> adota a dialética socrática como premissa pedagógica: ele orienta o raciocínio do estudante formulando perguntas instigantes, indicando conceitos teóricos e estimulando a reflexão metacognitiva.
+                    </p>
+                    <p class="text-secondary small mb-0 leading-relaxed">
+                        Dessa forma, o estudante desenvolve pensamento computacional autônomo, aprendendo a identificar seus próprios equívocos lógicos sem se tornar dependente de respostas prontas.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card feature-card shadow-sm p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="fs-4">🎚️</span>
+                        <h5 class="fw-bold text-dark mb-0">Régua Dinâmica de Rigor Socrático</h5>
+                    </div>
+                    <p class="text-secondary small mb-3 leading-relaxed">
+                        O docente possui controle total sobre o nível de auxílio prestado pela IA em cada atividade, podendo alternar em tempo real entre <strong>6 níveis de intervenção pedagógica</strong>:
+                    </p>
+                    <ul class="list-unstyled small mb-0 text-secondary">
+                        <li class="mb-2"><strong>1. Socrático Estrito:</strong> Apenas perguntas reflexivas; proibido fornecer código ou sintaxe.</li>
+                        <li class="mb-2"><strong>2. Pistas Conceituais:</strong> Explicação da teoria e lógica subjacente.</li>
+                        <li class="mb-2"><strong>3. Pseudocódigo:</strong> Estrutura e modelo genérico de resolução.</li>
+                        <li class="mb-2"><strong>4. Explicação Guiada:</strong> Passo a passo detalhado do raciocínio lógico.</li>
+                        <li class="mb-2"><strong>5. Demonstração Controlada:</strong> Trechos pontuais de código em locais bloqueados.</li>
+                        <li class="mb-0"><strong>6. Modo Livre:</strong> Respostas completas e solução direta sem restrições.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: METODOLOGIA E AUTOAVALIAÇÃO -->
+        <div class="card feature-card shadow-sm p-4 mb-5">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-7">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="fs-4">📝</span>
+                        <h5 class="fw-bold text-dark mb-0">Autoavaliação Metacognitiva & Feedback Docente</h5>
+                    </div>
+                    <p class="text-secondary small mb-2">
+                        Após interagir com o tutor socrático, o estudante conclui a atividade preenchendo sua <strong>autoavaliação de aprendizagem</strong>, registrando:
+                    </p>
+                    <ul class="small text-secondary mb-3">
+                        <li><strong>Autonomia na Resolução:</strong> Se conseguiu resolver autonomamente ou se necessita de apoio adicional.</li>
+                        <li><strong>Régua de Compreensão (1 a 5):</strong> Percepção clara sobre o domínio do conceito.</li>
+                        <li><strong>Régua de Confiança (1 a 5):</strong> Segurança para resolver problemas similares.</li>
+                        <li><strong>Dificuldade Relatada & Estratégia Útil:</strong> Reflexão qualitativa do próprio percurso formativo.</li>
+                    </ul>
+                    <p class="small text-muted mb-0">
+                        Os dados são consolidados no painel docente em tempo real, permitindo identificar gargalos de aprendizagem na turma com precisão cirúrgica.
+                    </p>
+                </div>
+                <div class="col-md-5">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <h6 class="fw-bold text-dark mb-2">💻 Arquitetura Tecnológica</h6>
+                        <ul class="list-unstyled small text-secondary mb-0">
+                            <li class="mb-1">⚡ <strong>Backend:</strong> Python 3.15 & FastAPI</li>
+                            <li class="mb-1">🗄️ <strong>Banco de Dados:</strong> SQLAlchemy ORM & SQLite</li>
+                            <li class="mb-1">🤖 <strong>Motor de IA:</strong> OpenAI GPT API com <em>PedagogyController</em></li>
+                            <li class="mb-1">🎨 <strong>Frontend:</strong> HTML5, Bootstrap 5.3 & Chart.js</li>
+                            <li class="mb-0">🔒 <strong>Segurança:</strong> Sessões criptografadas & RBAC (Aluno, Docente, Admin)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de Retorno -->
+        <div class="text-center">
+            <a href="{{ back_url }}" class="btn btn-primary px-5 py-2 fw-bold shadow-sm rounded-pill">
+                ← Voltar para a Plataforma
+            </a>
+        </div>
+
+        <div class="text-center mt-5">
+            <small class="text-muted" style="font-size: 0.78rem;">
+                © 2026 Tutor Socrático IA • Apresentado na disciplina <strong>SIN5006 - Inteligência Computacional</strong>
+            </small>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -3,167 +3,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Estudante - Tutor Socrático</title>
+    <title>Espaço do Aluno - Tutor Socrático</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .navbar-student {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        .progress-card {
+            border: 0;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+        .activity-card {
+            border: 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .activity-list-item {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .activity-list-item:hover {
+            background-color: #f8fafc;
+        }
+        .activity-list-item.active {
+            background-color: #eff6ff;
+            border-left-color: #0d6efd;
+            color: #0f172a;
+        }
+        .chat-container {
+            background-color: #f8fafc;
+            border-radius: 0;
+            height: 420px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .chat-bubble-student {
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            color: #ffffff;
+            border-radius: 16px 16px 4px 16px;
+            box-shadow: 0 2px 6px rgba(13, 110, 253, 0.15);
+        }
+        .chat-bubble-ai {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px 16px 16px 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .eval-step-btn {
+            transition: all 0.2s ease-in-out;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+        .eval-step-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+        .eval-step-btn.active-step {
+            transform: scale(1.03);
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .custom-range-slider {
+            cursor: pointer;
+            height: 1.5rem;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-primary px-4 shadow-sm mb-4">
-        <span class="navbar-brand fw-bold">Tutor Socrático IA - Espaço do Aluno</span>
-        <div class="d-flex align-items-center gap-3">
-            <span class="text-white">Olá, <strong>{{ user_name }}</strong></span>
-            <a href="/logout" class="btn btn-outline-light btn-sm">Sair</a>
+<body>
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-dark navbar-student px-4 shadow-sm mb-4">
+        <div class="container-fluid px-0">
+            <span class="navbar-brand fw-bold d-flex align-items-center gap-2">
+                <span>🤖</span>
+                <span>Tutor Socrático IA - Espaço do Aluno</span>
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white-50">Estudante: <strong class="text-white">{{ user_name }}</strong></span>
+                <a href="/sobre" class="btn btn-outline-light btn-sm px-3">
+                    ℹ️ Sobre
+                </a>
+                <a href="/logout" class="btn btn-outline-light btn-sm px-3">Sair</a>
+            </div>
         </div>
     </nav>
 
     <div class="container pb-5">
+        <!-- Notificações de Erro ou Sucesso -->
+        {% if error_msg %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 border-0 d-flex align-items-center gap-2" role="alert">
+            <span class="fs-5">⚠️</span>
+            <div><strong>Atenção:</strong> {{ error_msg }}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+        {% endif %}
+        {% if success_msg %}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4 border-0 d-flex align-items-center gap-2" role="alert">
+            <span class="fs-5">🎉</span>
+            <div><strong>Sucesso:</strong> {{ success_msg }}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+        {% endif %}
+
+        <!-- Faixa de Progresso Geral do Aluno -->
+        <div class="card progress-card shadow-sm mb-4 p-3 border-0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-4">🎯</span>
+                    <div>
+                        <strong class="d-block text-dark">Seu Progresso de Aprendizagem</strong>
+                        <small class="text-muted">Conclua o diálogo e a autoavaliação em cada atividade para avançar.</small>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
+                        {{ completed_activity_ids|length }} de {{ activities|length }} concluídas
+                    </span>
+                </div>
+            </div>
+            {% set total_act = activities|length %}
+            {% set comp_act = completed_activity_ids|length %}
+            {% set perc = (comp_act / total_act * 100)|round|int if total_act > 0 else 0 %}
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: {{ perc }}%;" aria-valuenow="{{ perc }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+
         <div class="row g-4">
             
-            <!-- Coluna da Esquerda: Lista de Atividades -->
-            <div class="col-md-4">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-dark text-white fw-bold">
-                        📘 Atividades Disponíveis
+            <!-- Coluna da Esquerda: Lista de Atividades com Filtro de Status -->
+            <div class="col-lg-4 col-md-5">
+                <div class="card activity-card shadow-sm bg-white mb-4">
+                    <div class="card-header bg-white py-3 px-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold text-dark fs-6">📘 Suas Atividades</span>
+                            <span class="badge bg-light text-muted border">{{ activities|length }} no total</span>
+                        </div>
+                        <!-- Mini Filtro de Atividades -->
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active filter-act-btn" id="filter-act-all" onclick="filterActivityList('all')">Todas</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm filter-act-btn" id="filter-act-pending" onclick="filterActivityList('pending')">Pendentes</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm filter-act-btn" id="filter-act-completed" onclick="filterActivityList('completed')">Concluídas</button>
+                        </div>
                     </div>
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush" id="activityListGroup">
                         {% if activities %}
                             {% for act in activities %}
+                            {% set is_comp = act.id in completed_activity_ids %}
                             <a href="/student/dashboard?activity_id={{ act.id }}" 
-                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if selected_activity and selected_activity.id == act.id %}active{% endif %}">
-                                <div>
-                                    <strong class="d-block">{{ act.title }}</strong>
-                                    <small class="text-muted">{{ act.subject }}</small>
+                               class="list-group-item list-group-item-action activity-list-item p-3 {% if selected_activity and selected_activity.id == act.id %}active{% endif %}"
+                               data-completed="{{ 'true' if is_comp else 'false' }}">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <strong class="text-dark">{{ act.title }}</strong>
+                                    {% if is_comp %}
+                                        <span class="badge bg-success rounded-pill">✅ Concluída</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark rounded-pill">Em aberto</span>
+                                    {% endif %}
                                 </div>
-                                <span class="badge bg-secondary rounded-pill">Nível {{ act.max_help_level }}</span>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">{{ act.subject }}</small>
+                                    <span class="badge bg-light text-muted border">Rigor Nível {{ act.max_help_level }}</span>
+                                </div>
                             </a>
                             {% endfor %}
                         {% else %}
-                            <div class="p-3 text-center text-muted">Nenhuma atividade disponível.</div>
+                            <div class="p-4 text-center text-muted">Nenhuma atividade disponível no momento.</div>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
             <!-- Coluna da Direita: Chat Socrático da Atividade Selecionada -->
-            <div class="col-md-8">
+            <div class="col-lg-8 col-md-7">
                 {% if selected_activity %}
-                <div class="card shadow-sm">
-                    <!-- Cabeçalho do Chat com Indicador de Rigor Socrático em Tempo Real -->
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                        <div>
-                            <h5 class="mb-0 fw-bold text-primary">{{ selected_activity.title }}</h5>
-                            <small class="text-muted">{{ selected_activity.description }}</small>
+                <div class="card activity-card shadow-sm bg-white mb-3">
+                    
+                    <!-- Cabeçalho da Atividade -->
+                    <div class="card-header bg-white py-3 px-4 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="mb-0 fw-bold text-dark">{{ selected_activity.title }}</h5>
+                                    {% if is_activity_completed %}
+                                        <span class="badge bg-success rounded-pill">✅ Concluída</span>
+                                    {% else %}
+                                        <span class="badge bg-primary rounded-pill">⚡ Em Andamento</span>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-secondary mt-1">{{ selected_activity.subject }}</span>
+                            </div>
+                            <div>
+                                {% if selected_activity.max_help_level == 1 %}
+                                    <span class="badge bg-danger px-3 py-2">🟢 Nível 1: Socrático Estrito</span>
+                                {% elif selected_activity.max_help_level == 2 %}
+                                    <span class="badge bg-warning text-dark px-3 py-2">🟡 Nível 2: Pistas Conceituais</span>
+                                {% elif selected_activity.max_help_level == 3 %}
+                                    <span class="badge bg-info text-dark px-3 py-2">🔵 Nível 3: Pseudocódigo</span>
+                                {% elif selected_activity.max_help_level == 4 %}
+                                    <span class="badge bg-primary px-3 py-2">🟣 Nível 4: Explicação Guiada</span>
+                                {% elif selected_activity.max_help_level == 5 %}
+                                    <span class="badge bg-dark px-3 py-2">🟠 Nível 5: Demonstração</span>
+                                {% else %}
+                                    <span class="badge bg-success px-3 py-2">🚀 Nível 6: Modo Livre (ChatGPT)</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div>
-                            {% if selected_activity.max_help_level == 1 %}
-                                <span class="badge bg-danger">🟢 Nível 1: Socrático Estrito</span>
-                            {% elif selected_activity.max_help_level == 2 %}
-                                <span class="badge bg-warning text-dark">🟡 Nível 2: Pistas Conceituais</span>
-                            {% elif selected_activity.max_help_level == 3 %}
-                                <span class="badge bg-info text-dark">🔵 Nível 3: Pseudocódigo</span>
-                            {% elif selected_activity.max_help_level == 4 %}
-                                <span class="badge bg-primary">🟣 Nível 4: Explicação Guiada</span>
-                            {% elif selected_activity.max_help_level == 5 %}
-                                <span class="badge bg-dark">🟠 Nível 5: Demonstração</span>
-                            {% else %}
-                                <span class="badge bg-success">🚀 Nível 6: Modo Livre (ChatGPT)</span>
-                            {% endif %}
+                        <div class="p-2 bg-light rounded text-secondary small border">
+                            <strong>Enunciado da Tarefa:</strong> {{ selected_activity.description }}
                         </div>
                     </div>
 
-                    <!-- Corpo do Chat (Histórico) -->
-                    <div class="card-body bg-light" style="height: 380px; overflow-y: auto;" id="chatContainer">
+                    <!-- Corpo do Diálogo Socrático -->
+                    <div class="card-body p-4 chat-container" id="chatContainer">
                         {% if interactions %}
                             {% for inter in interactions %}
                                 <!-- Mensagem do Estudante -->
                                 <div class="d-flex justify-content-end mb-3">
-                                    <div class="bg-primary text-white p-3 rounded-3 shadow-sm" style="max-width: 80%;">
-                                        <strong>Você:</strong>
-                                        <p class="mb-0">{{ inter.student_prompt }}</p>
+                                    <div class="chat-bubble-student p-3" style="max-width: 82%;">
+                                        <div class="small opacity-75 mb-1 fw-bold">Você:</div>
+                                        <p class="mb-0" style="white-space: pre-wrap;">{{ inter.student_prompt }}</p>
                                     </div>
                                 </div>
-                                <!-- Resposta do Tutor IA -->
+                                <!-- Resposta do Tutor Socrático IA -->
                                 <div class="d-flex justify-content-start mb-3">
-                                    <div class="bg-white border p-3 rounded-3 shadow-sm text-dark" style="max-width: 80%;">
+                                    <div class="chat-bubble-ai p-3" style="max-width: 85%;">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <strong class="text-primary">🤖 Tutor Socrático:</strong>
+                                            <strong class="text-primary d-flex align-items-center gap-1">
+                                                <span>🤖</span>
+                                                <span>Tutor Socrático</span>
+                                            </strong>
                                             <span class="badge bg-light text-muted border">Nível {{ inter.help_level }}</span>
                                         </div>
-                                        <p class="mb-0" style="white-space: pre-wrap;">{{ inter.ai_response }}</p>
+                                        <p class="mb-0 text-dark" style="white-space: pre-wrap; line-height: 1.5;">{{ inter.ai_response }}</p>
                                     </div>
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <div class="text-center text-muted py-5">
-                                💬 Digite sua primeira dúvida ou tentativa de resolução abaixo para iniciar o diálogo socrático.
+                            <div class="text-center text-muted py-5 px-3">
+                                <div class="fs-1 mb-2">💬</div>
+                                <h6 class="fw-bold text-dark">Inicie seu diálogo pedagógico</h6>
+                                <p class="small text-muted mb-0" style="max-width: 480px; margin: auto;">
+                                    Compartilhe sua dúvida, raciocínio ou trecho de código abaixo. O tutor socrático fará perguntas reflexivas para orientar sua resolução.
+                                </p>
                             </div>
                         {% endif %}
                     </div>
 
-                    <!-- Formulário de Envio de Mensagem -->
-                    <div class="card-footer bg-white">
-                        <form action="/student/chat" method="post" class="d-flex gap-2">
-                            <input type="hidden" name="activity_id" value="{{ selected_activity.id }}">
-                            <input type="text" name="student_prompt" class="form-control" placeholder="Digite sua dúvida ou código..." required autocomplete="off">
-                            <button type="submit" class="btn btn-primary fw-bold px-4">Enviar</button>
-                        </form>
+                    <!-- Rodapé de Envio ou Alerta de Conclusão -->
+                    <div class="card-footer bg-white p-3 border-top">
+                        {% if is_activity_completed %}
+                            <div class="alert alert-success d-flex align-items-center mb-0 py-2 border-0">
+                                <span class="me-2 fs-5">🔒</span>
+                                <div>
+                                    <strong>Atividade Finalizada!</strong> Sua autoavaliação foi registrada. Novas solicitações para esta atividade estão desabilitadas.
+                                </div>
+                            </div>
+                        {% else %}
+                            <form action="/student/chat" method="post" class="d-flex gap-2">
+                                <input type="hidden" name="activity_id" value="{{ selected_activity.id }}">
+                                <input type="text" name="student_prompt" class="form-control" placeholder="Escreva sua dúvida, tentativa ou raciocínio..." required autocomplete="off">
+                                <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Enviar</button>
+                            </form>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Botão de Autoavaliação Metacognitiva -->
-                <div class="mt-3 text-end">
-                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#selfEvalModal">
-                        📝 Concluí esta atividade (Preencher Autoavaliação)
-                    </button>
+                <!-- Painel Inferior: Ações de Conclusão e Autoavaliação -->
+                <div>
+                    {% if is_activity_completed %}
+                        <div class="p-3 bg-white border border-success rounded-3 shadow-sm d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-success fw-bold d-block">🎉 Atividade Concluída com Sucesso!</span>
+                                <small class="text-muted">Você já registrou sua autoavaliação e reflexão metacognitiva.</small>
+                            </div>
+                            <button type="button" class="btn btn-outline-success btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#viewEvalModal">
+                                📋 Ver Minha Autoavaliação
+                            </button>
+                        </div>
+                    {% elif interactions %}
+                        <div class="d-flex flex-wrap justify-content-between align-items-center p-3 bg-white border border-primary-subtle rounded-3 shadow-sm gap-2">
+                            <div>
+                                <strong class="text-dark d-block">💡 Terminou de resolver o problema?</strong>
+                                <small class="text-muted">Conclua a atividade e preencha a autoavaliação para finalizar.</small>
+                            </div>
+                            <button type="button" class="btn btn-success fw-bold px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#selfEvalModal">
+                                📝 Concluir Atividade & Autoavaliação
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="d-flex flex-wrap justify-content-between align-items-center p-3 bg-white border rounded-3 shadow-sm gap-2">
+                            <div>
+                                <strong class="text-muted d-block">💬 Diálogo Pedagógico Obrigatório</strong>
+                                <small class="text-muted">Converse com o tutor socrático tirando dúvidas antes de poder concluir e autoavaliar.</small>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Envie ao menos uma dúvida antes de concluir">
+                                📝 Concluir Atividade (Interaja primeiro)
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
 
-                <!-- Modal de Autoavaliação -->
-                <div class="modal fade" id="selfEvalModal" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
+                <!-- MODAL DE AUTOAVALIAÇÃO COM RÉGUAS VISUAIS MODERNAS -->
+                {% if not is_activity_completed %}
+                <div class="modal fade" id="selfEvalModal" tabindex="-1" aria-labelledby="selfEvalModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content border-0 shadow">
                             <form action="/student/self-evaluation" method="post">
                                 <div class="modal-header bg-success text-white">
-                                    <h5 class="modal-title fw-bold">Autoavaliação de Aprendizagem</h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    <div>
+                                        <h5 class="modal-title fw-bold" id="selfEvalModalLabel">📝 Autoavaliação de Aprendizagem</h5>
+                                        <small class="text-white-50">Atividade: <strong>{{ selected_activity.title }}</strong></small>
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                                 </div>
-                                <div class="modal-body">
+                                <div class="modal-body p-4 bg-light">
                                     <input type="hidden" name="activity_id" value="{{ selected_activity.id }}">
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Conseguiu resolver o problema?</label>
+                                    <div class="alert alert-info py-2 small mb-4 border-0 d-flex align-items-center gap-2">
+                                        <span>ℹ️</span>
+                                        <div>
+                                            Ao submeter esta avaliação, a atividade será marcada como <strong>concluída</strong> e o diálogo com o tutor socrático será finalizado.
+                                        </div>
+                                    </div>
+
+                                    <!-- 1. Pergunta de Autonomia -->
+                                    <div class="card border-0 shadow-sm p-3 bg-white mb-4">
+                                        <label class="form-label fw-bold text-dark mb-2">🎯 Conseguiu resolver o problema?</label>
                                         <select name="solved_alone" class="form-select">
-                                            <option value="true">Sim, autonomamente com apoio da IA</option>
-                                            <option value="false">Ainda preciso de mais auxílio</option>
+                                            <option value="true" selected>Sim, autonomamente com orientação e perguntas do tutor IA</option>
+                                            <option value="false">Ainda preciso de mais auxílio para dominar este exercício</option>
                                         </select>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Nível de Compreensão do Conceito (1 a 5)</label>
-                                        <input type="range" name="comprehension_level" class="form-range" min="1" max="5" value="4">
+
+                                    <!-- 2. RÉGUA DO NÍVEL DE COMPREENSÃO (1 a 5) -->
+                                    <div class="card border-0 shadow-sm p-3 bg-white mb-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="form-label fw-bold text-dark mb-0">⭐ Nível de Compreensão do Conceito</label>
+                                            <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" id="comprehensionBadge">
+                                                Nível 4 - Bom
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Slider Interativo -->
+                                        <div class="my-2 px-1">
+                                            <input type="range" class="form-range custom-range-slider" min="1" max="5" step="1" value="4" 
+                                                   id="comprehensionInput" name="comprehension_level"
+                                                   oninput="updateComprehension(this.value)">
+                                        </div>
+
+                                        <!-- 5 Botões Clicáveis e Visíveis -->
+                                        <div class="row g-1 text-center mt-1" id="compStepButtons">
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="comp-btn-1" onclick="setComprehensionLevel(1)">
+                                                    <div class="fw-bold fs-6">1</div>
+                                                    <div class="small">Muito Baixo</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="comp-btn-2" onclick="setComprehensionLevel(2)">
+                                                    <div class="fw-bold fs-6">2</div>
+                                                    <div class="small">Baixo</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="comp-btn-3" onclick="setComprehensionLevel(3)">
+                                                    <div class="fw-bold fs-6">3</div>
+                                                    <div class="small">Razoável</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="comp-btn-4" onclick="setComprehensionLevel(4)">
+                                                    <div class="fw-bold fs-6">4</div>
+                                                    <div class="small">Bom</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="comp-btn-5" onclick="setComprehensionLevel(5)">
+                                                    <div class="fw-bold fs-6">5</div>
+                                                    <div class="small">Excelente</div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Caixa Descritiva da Compreensão -->
+                                        <div class="p-2 mt-2 rounded border-start border-4 bg-light small" id="comprehensionDescBox">
+                                            <strong id="comprehensionDescTitle" class="d-block mb-1"></strong>
+                                            <span id="comprehensionDescText" class="text-secondary"></span>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Nível de Confiança no Conteúdo (1 a 5)</label>
-                                        <input type="range" name="confidence_level" class="form-range" min="1" max="5" value="4">
+
+                                    <!-- 3. RÉGUA DO NÍVEL DE CONFIANÇA (1 a 5) -->
+                                    <div class="card border-0 shadow-sm p-3 bg-white mb-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="form-label fw-bold text-dark mb-0">🛡️ Nível de Confiança no Conteúdo</label>
+                                            <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" id="confidenceBadge">
+                                                Nível 4 - Confiante
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Slider Interativo -->
+                                        <div class="my-2 px-1">
+                                            <input type="range" class="form-range custom-range-slider" min="1" max="5" step="1" value="4" 
+                                                   id="confidenceInput" name="confidence_level"
+                                                   oninput="updateConfidence(this.value)">
+                                        </div>
+
+                                        <!-- 5 Botões Clicáveis e Visíveis -->
+                                        <div class="row g-1 text-center mt-1" id="confStepButtons">
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="conf-btn-1" onclick="setConfidenceLevel(1)">
+                                                    <div class="fw-bold fs-6">1</div>
+                                                    <div class="small">Inseguro</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="conf-btn-2" onclick="setConfidenceLevel(2)">
+                                                    <div class="fw-bold fs-6">2</div>
+                                                    <div class="small">Pouco Seguro</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="conf-btn-3" onclick="setConfidenceLevel(3)">
+                                                    <div class="fw-bold fs-6">3</div>
+                                                    <div class="small">Médio</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="conf-btn-4" onclick="setConfidenceLevel(4)">
+                                                    <div class="fw-bold fs-6">4</div>
+                                                    <div class="small">Confiante</div>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <button type="button" class="btn btn-sm w-100 p-2 eval-step-btn" id="conf-btn-5" onclick="setConfidenceLevel(5)">
+                                                    <div class="fw-bold fs-6">5</div>
+                                                    <div class="small">Muito Seguro</div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Caixa Descritiva da Confiança -->
+                                        <div class="p-2 mt-2 rounded border-start border-4 bg-light small" id="confidenceDescBox">
+                                            <strong id="confidenceDescTitle" class="d-block mb-1"></strong>
+                                            <span id="confidenceDescText" class="text-secondary"></span>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Principal Dificuldade Enfrentada</label>
-                                        <input type="text" name="main_difficulty" class="form-control" placeholder="Ex: Lógica do laço ou erro de sintaxe">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Estratégia mais Útil do Tutor</label>
-                                        <input type="text" name="helpful_strategy" class="form-control" placeholder="Ex: A pergunta sobre a condição de parada">
+
+                                    <!-- 4. Perguntas Qualitativas -->
+                                    <div class="card border-0 shadow-sm p-3 bg-white mb-3">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-dark">⚠️ Principal Dificuldade Enfrentada</label>
+                                            <input type="text" name="main_difficulty" class="form-control" placeholder="Ex: A lógica do laço ou erro de sintaxe...">
+                                        </div>
+                                        <div>
+                                            <label class="form-label fw-bold text-dark">💡 Estratégia mais Útil do Tutor Socrático</label>
+                                            <input type="text" name="helpful_strategy" class="form-control" placeholder="Ex: A pergunta reflexiva sobre a condição de parada...">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-success fw-bold">Submeter Avaliação</button>
+                                <div class="modal-footer bg-white">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar ao Chat</button>
+                                    <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">Concluir e Submeter Autoavaliação</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
+                {% endif %}
+
+                <!-- Modal de Visualização da Autoavaliação Concluída -->
+                {% if is_activity_completed and current_evaluation %}
+                <div class="modal fade" id="viewEvalModal" tabindex="-1" aria-labelledby="viewEvalModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-md">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title fw-bold" id="viewEvalModalLabel">📋 Sua Autoavaliação Registrada</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body p-4 bg-light">
+                                <div class="card border-0 shadow-sm p-3 bg-white mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small">Status de Resolução:</span>
+                                        <span class="badge {% if current_evaluation.solved_alone %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                            {% if current_evaluation.solved_alone %}Autônomo com apoio da IA{% else %}Necessita de auxílio adicional{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small">Nível de Compreensão:</span>
+                                        <span class="badge bg-primary fs-6">{{ current_evaluation.comprehension_level }} de 5</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted small">Nível de Confiança:</span>
+                                        <span class="badge bg-info text-dark fs-6">{{ current_evaluation.confidence_level }} de 5</span>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm mb-3">
+                                    <div class="card-header bg-white py-2 fw-semibold text-danger small border-bottom">
+                                        ⚠️ Dificuldade Enfrentada:
+                                    </div>
+                                    <div class="card-body bg-white py-2">
+                                        <p class="mb-0 text-dark small">{{ current_evaluation.main_difficulty or 'Não informado' }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-white py-2 fw-semibold text-success small border-bottom">
+                                        💡 Estratégia Útil do Tutor Socrático:
+                                    </div>
+                                    <div class="card-body bg-white py-2">
+                                        <p class="mb-0 text-dark small">{{ current_evaluation.helpful_strategy or 'Não informado' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-white">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% else %}
-                <div class="alert alert-info shadow-sm">
-                    👈 Selecione uma atividade na lista ao lado para começar.
+                <div class="card border-0 shadow-sm p-5 text-center bg-white">
+                    <div class="fs-1 mb-2">👈</div>
+                    <h5 class="fw-bold text-dark">Selecione uma atividade para começar</h5>
+                    <p class="text-muted mb-0">Escolha uma das atividades disponíveis na lista ao lado para interagir com o tutor socrático.</p>
                 </div>
                 {% endif %}
             </div>
@@ -171,12 +544,187 @@
         </div>
     </div>
 
-    <!-- Script para manter a rolagem do chat no final -->
+    <!-- Scripts de Interação, Réguas Visuais e Rolagem do Chat -->
     <script>
+        // Rolagem automática para o final do chat
         const chatContainer = document.getElementById('chatContainer');
         if (chatContainer) {
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+
+        // Mini filtro de atividades na coluna esquerda
+        function filterActivityList(type) {
+            const items = document.querySelectorAll('.activity-list-item');
+            items.forEach(item => {
+                const isCompleted = item.getAttribute('data-completed') === 'true';
+                if (type === 'all') {
+                    item.style.display = '';
+                } else if (type === 'pending') {
+                    item.style.display = !isCompleted ? '' : 'none';
+                } else if (type === 'completed') {
+                    item.style.display = isCompleted ? '' : 'none';
+                }
+            });
+
+            document.querySelectorAll('.filter-act-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`filter-act-${type}`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // Metadados das Réguas de Compreensão e Confiança
+        const comprehensionMetadata = {
+            1: {
+                title: "Nível 1 - Muito Baixo",
+                badgeClass: "bg-danger text-white",
+                borderColor: "#dc3545",
+                desc: "Não consegui entender a lógica central do conceito abordado na atividade."
+            },
+            2: {
+                title: "Nível 2 - Baixo",
+                badgeClass: "bg-warning text-dark",
+                borderColor: "#ffc107",
+                desc: "Compreendi apenas partes isoladas do problema e ainda tenho muitas dúvidas."
+            },
+            3: {
+                title: "Nível 3 - Razoável",
+                badgeClass: "bg-info text-dark",
+                borderColor: "#0dcaf0",
+                desc: "Entendi a lógica geral do conceito, mas ainda sinto incertezas na resolução."
+            },
+            4: {
+                title: "Nível 4 - Bom",
+                badgeClass: "bg-primary text-white",
+                borderColor: "#0d6efd",
+                desc: "Compreendi bem o conceito e sei como aplicá-lo em outros problemas similares."
+            },
+            5: {
+                title: "Nível 5 - Excelente (Totalmente Claro)",
+                badgeClass: "bg-success text-white",
+                borderColor: "#198754",
+                desc: "Dominei totalmente a lógica com clareza plena e autonomia."
+            }
+        };
+
+        const confidenceMetadata = {
+            1: {
+                title: "Nível 1 - Inseguro",
+                badgeClass: "bg-danger text-white",
+                borderColor: "#dc3545",
+                desc: "Precisaria de auxílio completo para tentar resolver outro problema semelhante."
+            },
+            2: {
+                title: "Nível 2 - Pouco Seguro",
+                badgeClass: "bg-warning text-dark",
+                borderColor: "#ffc107",
+                desc: "Teria grandes dificuldades para reproduzir a solução sozinho sem o tutor."
+            },
+            3: {
+                title: "Nível 3 - Médio",
+                badgeClass: "bg-info text-dark",
+                borderColor: "#0dcaf0",
+                desc: "Consigo resolver tarefas semelhantes consultando anotações e materiais."
+            },
+            4: {
+                title: "Nível 4 - Confiante",
+                badgeClass: "bg-primary text-white",
+                borderColor: "#0d6efd",
+                desc: "Sinto-me seguro para resolver problemas parecidos de forma independente."
+            },
+            5: {
+                title: "Nível 5 - Muito Seguro",
+                badgeClass: "bg-success text-white",
+                borderColor: "#198754",
+                desc: "Sinto-me 100% seguro e apto inclusive a explicar este raciocínio para um colega."
+            }
+        };
+
+        function updateComprehension(val) {
+            val = parseInt(val);
+            const meta = comprehensionMetadata[val];
+            if (!meta) return;
+
+            const slider = document.getElementById('comprehensionInput');
+            if (slider && parseInt(slider.value) !== val) {
+                slider.value = val;
+            }
+
+            const badge = document.getElementById('comprehensionBadge');
+            if (badge) {
+                badge.className = `badge fs-6 px-3 py-2 rounded-pill shadow-sm ${meta.badgeClass}`;
+                badge.innerText = meta.title;
+            }
+
+            const descBox = document.getElementById('comprehensionDescBox');
+            const descTitle = document.getElementById('comprehensionDescTitle');
+            const descText = document.getElementById('comprehensionDescText');
+            if (descBox && descTitle && descText) {
+                descBox.style.borderLeftColor = meta.borderColor;
+                descTitle.innerText = meta.title;
+                descText.innerText = meta.desc;
+            }
+
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`comp-btn-${i}`);
+                if (btn) {
+                    if (i === val) {
+                        btn.className = `btn btn-sm w-100 p-2 eval-step-btn active-step shadow-sm ${comprehensionMetadata[i].badgeClass}`;
+                    } else {
+                        btn.className = 'btn btn-sm w-100 p-2 eval-step-btn text-dark';
+                    }
+                }
+            }
+        }
+
+        function setComprehensionLevel(val) {
+            updateComprehension(val);
+        }
+
+        function updateConfidence(val) {
+            val = parseInt(val);
+            const meta = confidenceMetadata[val];
+            if (!meta) return;
+
+            const slider = document.getElementById('confidenceInput');
+            if (slider && parseInt(slider.value) !== val) {
+                slider.value = val;
+            }
+
+            const badge = document.getElementById('confidenceBadge');
+            if (badge) {
+                badge.className = `badge fs-6 px-3 py-2 rounded-pill shadow-sm ${meta.badgeClass}`;
+                badge.innerText = meta.title;
+            }
+
+            const descBox = document.getElementById('confidenceDescBox');
+            const descTitle = document.getElementById('confidenceDescTitle');
+            const descText = document.getElementById('confidenceDescText');
+            if (descBox && descTitle && descText) {
+                descBox.style.borderLeftColor = meta.borderColor;
+                descTitle.innerText = meta.title;
+                descText.innerText = meta.desc;
+            }
+
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`conf-btn-${i}`);
+                if (btn) {
+                    if (i === val) {
+                        btn.className = `btn btn-sm w-100 p-2 eval-step-btn active-step shadow-sm ${confidenceMetadata[i].badgeClass}`;
+                    } else {
+                        btn.className = 'btn btn-sm w-100 p-2 eval-step-btn text-dark';
+                    }
+                }
+            }
+        }
+
+        function setConfidenceLevel(val) {
+            updateConfidence(val);
+        }
+
+        // Inicializar réguas no carregamento da página
+        document.addEventListener('DOMContentLoaded', () => {
+            updateComprehension(4);
+            updateConfidence(4);
+        });
     </script>
 </body>
 </html>

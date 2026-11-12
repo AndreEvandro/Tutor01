@@ -7,196 +7,459 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        .kpi-card {
+            border: 0;
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06) !important;
+        }
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1.5rem;
+        }
+        .nav-tabs-custom {
+            border-bottom: 2px solid #e2e8f0;
+            gap: 8px;
+        }
+        .nav-tabs-custom .nav-link {
+            border: 0;
+            border-bottom: 3px solid transparent;
+            color: #64748b;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s ease;
+        }
+        .nav-tabs-custom .nav-link:hover {
+            color: #0f172a;
+            background-color: #f8fafc;
+        }
+        .nav-tabs-custom .nav-link.active {
+            color: #0d6efd;
+            background-color: transparent;
+            border-bottom-color: #0d6efd;
+        }
+        .step-label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .step-btn {
+            transition: all 0.2s ease-in-out;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+        .step-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        .step-btn.active-step {
+            transform: scale(1.03);
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .custom-socratic-range {
+            cursor: pointer;
+            height: 1.6rem;
+        }
+        .socratic-ruler-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-dark bg-warning px-4 shadow-sm mb-4">
-        <span class="navbar-brand fw-bold text-dark">Painel Docente - Tutor Socrático</span>
-        <div class="d-flex align-items-center gap-3">
-            <span class="text-dark">Olá, <strong>{{ user_name }}</strong></span>
-            <a href="/teacher/export-csv" class="btn btn-dark btn-sm">📊 Exportar Relatório CSV</a>
-            <a href="/logout" class="btn btn-outline-dark btn-sm">Sair</a>
+<body>
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-dark navbar-custom px-4 shadow-sm mb-4">
+        <div class="container-fluid px-0">
+            <span class="navbar-brand fw-bold d-flex align-items-center gap-2">
+                <span>🎓</span>
+                <span>Tutor Socrático IA - Painel Docente</span>
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white-50">Docente: <strong class="text-white">{{ user_name }}</strong></span>
+                <a href="/sobre" class="btn btn-outline-light btn-sm px-3">
+                    ℹ️ Sobre
+                </a>
+                <a href="/teacher/export-csv" class="btn btn-outline-light btn-sm px-3">
+                    📊 Exportar CSV
+                </a>
+                <a href="/logout" class="btn btn-danger btn-sm px-3">Sair</a>
+            </div>
         </div>
     </nav>
 
     <div class="container pb-5">
-        <!-- Notificação de Atualização da Régua -->
-        <div id="toastAlert" class="alert alert-success alert-dismissible fade hide mb-3 shadow-sm" role="alert">
+        <!-- Toast Flutuante de Notificação da Régua -->
+        <div id="toastAlert" class="alert alert-success alert-dismissible fade hide mb-3 shadow-sm border-0 d-flex align-items-center gap-2" role="alert">
+            <span class="fs-5">⚡</span>
             <span id="toastMessage">Nível socrático atualizado em tempo real!</span>
-            <button type="button" class="btn-close" onclick="document.getElementById('toastAlert').classList.replace('show', 'hide')"></button>
+            <button type="button" class="btn-close ms-auto" onclick="document.getElementById('toastAlert').classList.replace('show', 'hide')"></button>
         </div>
 
-        <!-- Dashboard Visual -->
+        <!-- 4 Cards de Indicadores Rápidos (Resumo Geral) -->
         <div class="row g-3 mb-4">
-            <div class="col-md-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold text-dark">
-                        📊 Distribuição dos Níveis de Suporte (1 ao 6)
-                    </div>
-                    <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 220px;">
-                        <canvas id="chartHelpLevels"></canvas>
+            <div class="col-6 col-lg-3">
+                <div class="card kpi-card shadow-sm h-100 bg-white">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="kpi-icon bg-primary bg-opacity-10 text-primary me-3">
+                            📘
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Atividades</span>
+                            <h3 class="fw-bold mb-0 text-dark">{{ activities|length }}</h3>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold text-dark">
-                        📈 Média de Percepção do Aluno (Escala 1 a 5)
+            <div class="col-6 col-lg-3">
+                <div class="card kpi-card shadow-sm h-100 bg-white">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="kpi-icon bg-success bg-opacity-10 text-success me-3">
+                            👥
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Estudantes</span>
+                            <h3 class="fw-bold mb-0 text-dark">{{ students|length }}</h3>
+                        </div>
                     </div>
-                    <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 220px;">
-                        <canvas id="chartSelfEval"></canvas>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card kpi-card shadow-sm h-100 bg-white">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="kpi-icon bg-warning bg-opacity-10 text-warning me-3">
+                            💬
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Diálogos com IA</span>
+                            <h3 class="fw-bold mb-0 text-dark">{{ interactions|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card kpi-card shadow-sm h-100 bg-white">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="kpi-icon bg-info bg-opacity-10 text-info me-3">
+                            ⭐
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Compreensão Média</span>
+                            <h3 class="fw-bold mb-0 text-dark">{{ avg_comprehension }}<small class="text-muted fs-6">/5</small></h3>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Navegação por Abas -->
-        <ul class="nav nav-pills mb-4 gap-2" id="teacherTab" role="tablist">
+        <!-- Navegação por Abas Limpa e Focada -->
+        <ul class="nav nav-tabs nav-tabs-custom mb-4" id="teacherTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button">
-                    📘 Atividades & Controle do Nível Socrático
+                <button class="nav-link active" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button">
+                    📘 Atividades & Régua Socrática ({{ activities|length }})
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold" id="interactions-tab" data-bs-toggle="tab" data-bs-target="#interactions" type="button">
-                    💬 Histórico de Interações ({{ interactions|length }})
+                <button class="nav-link" id="interactions-tab" data-bs-toggle="tab" data-bs-target="#interactions" type="button">
+                    💬 Diálogos dos Estudantes ({{ interactions|length }})
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold" id="evaluations-tab" data-bs-toggle="tab" data-bs-target="#evaluations" type="button">
-                    📝 Autoavaliações dos Alunos ({{ evaluations|length }})
+                <button class="nav-link" id="evaluations-tab" data-bs-toggle="tab" data-bs-target="#evaluations" type="button">
+                    📝 Autoavaliações ({{ evaluations|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button">
+                    📊 Análise Pedagógica & Gráficos
                 </button>
             </li>
         </ul>
 
         <div class="tab-content" id="teacherTabContent">
-            <!-- ABA 1: Atividades com Réguas em Tempo Real -->
+            
+            <!-- ABA 1: Atividades com Réguas em Largura Total -->
             <div class="tab-pane fade show active" id="activities" role="tabpanel">
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-dark text-white fw-bold">
-                                Nova Atividade
-                            </div>
-                            <div class="card-body">
-                                <form action="/teacher/activity/create" method="post">
-                                    <div class="mb-3">
-                                        <label class="form-label">Título</label>
-                                        <input type="text" name="title" class="form-control" required placeholder="Ex: Estrutura Repetitiva While">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Disciplina</label>
-                                        <input type="text" name="subject" class="form-control" required placeholder="Ex: Algoritmos I">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Nível Socrático Inicial</label>
-                                        <select name="max_help_level" class="form-select">
-                                            <option value="1">Nível 1 - Socrático Estrito</option>
-                                            <option value="2">Nível 2 - Pistas Conceituais</option>
-                                            <option value="3">Nível 3 - Pseudocódigo</option>
-                                            <option value="4">Nível 4 - Explicação Guiada</option>
-                                            <option value="5">Nível 5 - Demonstração Prática</option>
-                                            <option value="6" selected>Nível 6 - ChatGPT Irrestrito</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Descrição</label>
-                                        <textarea name="description" class="form-control" rows="3" required placeholder="Enunciado da tarefa..."></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Criar Atividade</button>
-                                </form>
-                            </div>
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Gestão de Atividades & Rigor Pedagógico</h5>
+                            <small class="text-muted">Ajuste o nível socrático da IA em tempo real para cada atividade.</small>
                         </div>
+                        <button type="button" class="btn btn-primary fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNovaAtividade">
+                            ➕ Nova Atividade
+                        </button>
                     </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 30%;" class="ps-4">Atividade & Disciplina</th>
+                                    <th style="width: 70%;" class="pe-4">Régua de Nível Socrático da IA (6 Níveis)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if activities %}
+                                    {% for act in activities %}
+                                    <tr>
+                                        <td class="align-top pt-3 ps-4">
+                                            <strong class="fs-6 text-primary d-block">{{ act.title }}</strong>
+                                            <span class="badge bg-secondary mb-2">{{ act.subject }}</span>
+                                            <p class="text-muted small mb-0 pe-2">{{ act.description }}</p>
+                                        </td>
+                                        <td class="pe-4 py-3">
+                                            <div class="socratic-ruler-card p-3 shadow-sm my-1">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="small fw-bold text-uppercase text-muted">
+                                                        🎚️ Nível Socrático Ativo
+                                                    </span>
+                                                    <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" id="badge-level-{{ act.id }}">
+                                                        Nível {{ act.max_help_level }}
+                                                    </span>
+                                                </div>
 
-                    <div class="col-md-8">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-white fw-bold text-primary">
-                                🎛️ Gestão de Atividades & Controlo Socrático em Tempo Real
-                            </div>
-                            <div class="card-body p-0">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Atividade</th>
-                                            <th style="width: 55%;">Régua de Nível Socrático da IA</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if activities %}
-                                            {% for act in activities %}
-                                            <tr>
-                                                <td>
-                                                    <strong>{{ act.title }}</strong><br>
-                                                    <small class="text-muted">{{ act.subject }}</small>
-                                                </td>
-                                                <td>
-                                                    <div class="p-2 border rounded bg-white">
-                                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                                            <span class="small fw-bold">Liberdade da IA:</span>
-                                                            <span class="badge bg-primary" id="badge-level-{{ act.id }}">
-                                                                Nível {{ act.max_help_level }}
-                                                            </span>
-                                                        </div>
-                                                        <input type="range" class="form-range" min="1" max="6" step="1"
-                                                               value="{{ act.max_help_level }}"
-                                                               oninput="updateBadgeText({{ act.id }}, this.value)"
-                                                               onchange="sendLevelUpdate({{ act.id }}, this.value)">
-                                                        <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
-                                                            <span>1: Estrito</span>
-                                                            <span>3: Pistas</span>
-                                                            <span>6: Irrestrito</span>
-                                                        </div>
-                                                        <small class="text-primary d-block mt-1 fw-semibold" id="desc-level-{{ act.id }}">
-                                                            <!-- Preenchido dinamicamente via JS -->
-                                                        </small>
+                                                <!-- Slider / Régua Interativa -->
+                                                <div class="my-2 px-1">
+                                                    <input type="range" class="form-range custom-socratic-range" min="1" max="6" step="1"
+                                                           id="range-level-{{ act.id }}"
+                                                           value="{{ act.max_help_level }}"
+                                                           oninput="onSliderInput({{ act.id }}, this.value)"
+                                                           onchange="sendLevelUpdate({{ act.id }}, this.value)">
+                                                </div>
+
+                                                <!-- Grid com os 6 Níveis Bem Visíveis e Clicáveis -->
+                                                <div class="row g-1 text-center mt-1" id="steps-container-{{ act.id }}">
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm w-100 p-1 step-btn" id="step-btn-{{ act.id }}-1" onclick="setRulerLevel({{ act.id }}, 1)">
+                                                            <div class="fw-bold fs-6">1</div>
+                                                            <div class="step-label">Estrito</div>
+                                                        </button>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                            <tr>
-                                                <td colspan="2" class="text-center text-muted py-4">Nenhuma atividade cadastrada.</td>
-                                            </tr>
-                                        {% endif %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm w-100 p-1 step-btn" id="step-btn-{{ act.id }}-2" onclick="setRulerLevel({{ act.id }}, 2)">
+                                                            <div class="fw-bold fs-6">2</div>
+                                                            <div class="step-label">Conceitual</div>
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm w-100 p-1 step-btn" id="step-btn-{{ act.id }}-3" onclick="setRulerLevel({{ act.id }}, 3)">
+                                                            <div class="fw-bold fs-6">3</div>
+                                                            <div class="step-label">Pseudocódigo</div>
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm w-100 p-1 step-btn" id="step-btn-{{ act.id }}-4" onclick="setRulerLevel({{ act.id }}, 4)">
+                                                            <div class="fw-bold fs-6">4</div>
+                                                            <div class="step-label">Guia Lógico</div>
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm w-100 p-1 step-btn" id="step-btn-{{ act.id }}-5" onclick="setRulerLevel({{ act.id }}, 5)">
+                                                            <div class="fw-bold fs-6">5</div>
+                                                            <div class="step-label">Exemplo</div>
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm w-100 p-1 step-btn" id="step-btn-{{ act.id }}-6" onclick="setRulerLevel({{ act.id }}, 6)">
+                                                            <div class="fw-bold fs-6">6</div>
+                                                            <div class="step-label">Livre</div>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Caixa com Descrição Pedagógica Dinâmica -->
+                                                <div class="p-2 mt-2 rounded border-start border-4 bg-light small" id="desc-box-{{ act.id }}">
+                                                    <strong id="desc-title-{{ act.id }}" class="d-block mb-1"></strong>
+                                                    <span id="desc-text-{{ act.id }}" class="text-secondary"></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted py-5">
+                                            <p class="mb-2">Nenhuma atividade cadastrada ainda.</p>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovaAtividade">
+                                                Cadastrar primeira atividade
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA 2: Interações Socráticas -->
+            <!-- ABA 2: Histórico de Interações dos Estudantes -->
             <div class="tab-pane fade" id="interactions" role="tabpanel">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold text-dark">
-                        Acompanhamento de Diálogos Socráticos em Tempo Real
+                
+                <!-- Barra de Filtros para Análise Docente -->
+                <div class="card border-0 shadow-sm rounded-3 mb-3 bg-white p-3">
+                    <div class="row g-2 align-items-center">
+                        <!-- Filtro por Estudante -->
+                        <div class="col-md-3 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">👤 Estudante:</label>
+                            <select id="filterStudent" class="form-select form-select-sm" onchange="applyInteractionsFilters()">
+                                <option value="">Todos os Estudantes ({{ students|length }})</option>
+                                {% for st in students %}
+                                    <option value="{{ st.id }}">{{ st.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Filtro por Atividade -->
+                        <div class="col-md-3 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">📘 Atividade:</label>
+                            <select id="filterActivity" class="form-select form-select-sm" onchange="applyInteractionsFilters()">
+                                <option value="">Todas as Atividades ({{ activities|length }})</option>
+                                {% for act in activities %}
+                                    <option value="{{ act.id }}">{{ act.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Filtro por Nível Socrático -->
+                        <div class="col-md-2 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">🎚️ Nível Socrático:</label>
+                            <select id="filterLevel" class="form-select form-select-sm" onchange="applyInteractionsFilters()">
+                                <option value="">Todos os Níveis (1-6)</option>
+                                <option value="1">Nível 1 - Estrito</option>
+                                <option value="2">Nível 2 - Conceitual</option>
+                                <option value="3">Nível 3 - Pseudocódigo</option>
+                                <option value="4">Nível 4 - Guia Lógico</option>
+                                <option value="5">Nível 5 - Demonstração</option>
+                                <option value="6">Nível 6 - Livre (ChatGPT)</option>
+                            </select>
+                        </div>
+                        <!-- Busca por Palavra-chave -->
+                        <div class="col-md-3 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">🔍 Palavra-chave:</label>
+                            <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Buscar no texto do diálogo..." oninput="applyInteractionsFilters()">
+                        </div>
+                        <!-- Botão Limpar -->
+                        <div class="col-md-1 col-12 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="clearInteractionsFilters()" title="Limpar todos os filtros">
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Status do Filtro -->
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <span class="small text-muted" id="filterCountStatus">
+                            Exibindo todos os <strong>{{ interactions|length }}</strong> diálogos
+                        </span>
+                        <span class="badge bg-primary text-white small" id="activeFilterBadge" style="display: none;">
+                            Filtros aplicados
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Tabela de Diálogos Socráticos -->
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Diálogos Socráticos Registrados</h5>
+                            <small class="text-muted">Acompanhe as interações dos alunos com o tutor em detalhes.</small>
+                        </div>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-hover table-striped mb-0">
-                            <thead class="table-dark">
+                        <table class="table table-hover align-middle mb-0" id="interactionsTable">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>Estudante</th>
-                                    <th>Atividade</th>
-                                    <th>Nível Usado</th>
-                                    <th>Mensagem do Aluno</th>
-                                    <th>Resposta da IA</th>
+                                    <th class="ps-4" style="width: 11%;">Data/Hora</th>
+                                    <th style="width: 16%;">Estudante</th>
+                                    <th style="width: 16%;">Atividade</th>
+                                    <th style="width: 12%;">Nível IA</th>
+                                    <th style="width: 22%;">Dúvida do Aluno</th>
+                                    <th style="width: 15%;">Intervenção IA</th>
+                                    <th class="pe-4 text-center" style="width: 8%;">Ação</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% if interactions %}
                                     {% for inter in interactions %}
-                                    <tr>
-                                        <td><strong>{{ student_map.get(inter.user_id, 'Estudante ' ~ inter.user_id) }}</strong></td>
-                                        <td><span class="badge bg-light text-dark border">{{ activity_map.get(inter.activity_id, 'Geral') }}</span></td>
-                                        <td><span class="badge bg-warning text-dark">Nível {{ inter.help_level }}</span></td>
-                                        <td style="max-width: 250px;"><code>{{ inter.student_prompt }}</code></td>
-                                        <td style="max-width: 300px;"><small>{{ inter.ai_response }}</small></td>
+                                    <tr class="interaction-row" 
+                                        data-student-id="{{ inter.user_id }}"
+                                        data-activity-id="{{ inter.activity_id }}"
+                                        data-level="{{ inter.help_level }}"
+                                        data-search-text="{{ student_map.get(inter.user_id, '') }} {{ activity_map.get(inter.activity_id, '') }} {{ inter.student_prompt }} {{ inter.ai_response }}">
+                                        <td class="ps-4 text-muted small">
+                                            {{ inter.created_at.strftime('%d/%m %H:%M') if inter.created_at else '-' }}
+                                        </td>
+                                        <td>
+                                            <strong class="text-dark">{{ student_map.get(inter.user_id, 'Estudante ' ~ inter.user_id) }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">{{ activity_map.get(inter.activity_id, 'Geral') }}</span>
+                                        </td>
+                                        <td>
+                                            {% if inter.help_level == 1 %}
+                                                <span class="badge bg-danger">1. Estrito</span>
+                                            {% elif inter.help_level == 2 %}
+                                                <span class="badge bg-warning text-dark">2. Conceitual</span>
+                                            {% elif inter.help_level == 3 %}
+                                                <span class="badge bg-info text-dark">3. Pseudocódigo</span>
+                                            {% elif inter.help_level == 4 %}
+                                                <span class="badge bg-primary">4. Guia</span>
+                                            {% elif inter.help_level == 5 %}
+                                                <span class="badge bg-dark">5. Exemplo</span>
+                                            {% else %}
+                                                <span class="badge bg-success">6. Livre</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <code class="text-break d-block text-truncate" style="max-width: 220px;" title="{{ inter.student_prompt }}">{{ inter.student_prompt }}</code>
+                                        </td>
+                                        <td>
+                                            <small class="text-secondary d-block text-truncate" style="max-width: 180px;" title="{{ inter.ai_response }}">{{ inter.ai_response }}</small>
+                                        </td>
+                                        <td class="pe-4 text-center">
+                                            <button type="button" class="btn btn-outline-primary btn-sm px-2 py-1 btn-view-dialogue"
+                                                    data-student="{{ student_map.get(inter.user_id, 'Estudante ' ~ inter.user_id) }}"
+                                                    data-activity="{{ activity_map.get(inter.activity_id, 'Geral') }}"
+                                                    data-level="{{ inter.help_level }}"
+                                                    data-date="{{ inter.created_at.strftime('%d/%m/%Y às %H:%M') if inter.created_at else '-' }}"
+                                                    data-tokens="{{ inter.total_tokens or 0 }}"
+                                                    data-prompt-tokens="{{ inter.prompt_tokens or 0 }}"
+                                                    data-comp-tokens="{{ inter.completion_tokens or 0 }}">
+                                                👁️ Analisar
+                                            </button>
+                                            <!-- Textos completos em elementos seguros para o modal -->
+                                            <div class="d-none full-prompt">{{ inter.student_prompt }}</div>
+                                            <div class="d-none full-response">{{ inter.ai_response }}</div>
+                                        </td>
                                     </tr>
                                     {% endfor %}
+                                    <tr id="noResultsRow" style="display: none;">
+                                        <td colspan="7" class="text-center text-muted py-5">
+                                            🔍 Nenhum diálogo socrático encontrado para os filtros selecionados.
+                                        </td>
+                                    </tr>
                                 {% else %}
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">Nenhuma interação registrada até o momento.</td>
+                                        <td colspan="7" class="text-center text-muted py-5">Nenhuma interação registrada até o momento.</td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -205,45 +468,155 @@
                 </div>
             </div>
 
-            <!-- ABA 3: Autoavaliações -->
+            <!-- ABA 3: Questionários de Autoavaliação -->
             <div class="tab-pane fade" id="evaluations" role="tabpanel">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold text-success">
-                        Respostas do Questionário de Autoavaliação
+                
+                <!-- Barra de Filtros para Autoavaliações -->
+                <div class="card border-0 shadow-sm rounded-3 mb-3 bg-white p-3">
+                    <div class="row g-2 align-items-center">
+                        <!-- Filtro por Estudante -->
+                        <div class="col-md-3 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">👤 Estudante:</label>
+                            <select id="filterEvalStudent" class="form-select form-select-sm" onchange="applyEvaluationFilters()">
+                                <option value="">Todos os Estudantes ({{ students|length }})</option>
+                                {% for st in students %}
+                                    <option value="{{ st.id }}">{{ st.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Filtro por Atividade -->
+                        <div class="col-md-3 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">📘 Atividade:</label>
+                            <select id="filterEvalActivity" class="form-select form-select-sm" onchange="applyEvaluationFilters()">
+                                <option value="">Todas as Atividades ({{ activities|length }})</option>
+                                {% for act in activities %}
+                                    <option value="{{ act.id }}">{{ act.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Filtro por Autonomia -->
+                        <div class="col-md-2 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">🎯 Autonomia:</label>
+                            <select id="filterEvalAutonomy" class="form-select form-select-sm" onchange="applyEvaluationFilters()">
+                                <option value="">Todas</option>
+                                <option value="true">Autônomo com IA</option>
+                                <option value="false">Com Auxílio Extra</option>
+                            </select>
+                        </div>
+                        <!-- Filtro por Compreensão -->
+                        <div class="col-md-2 col-sm-6">
+                            <label class="form-label small fw-bold text-muted mb-1">⭐ Compreensão:</label>
+                            <select id="filterEvalComprehension" class="form-select form-select-sm" onchange="applyEvaluationFilters()">
+                                <option value="">Todos (1 a 5)</option>
+                                <option value="5">Nível 5 (Totalmente Claro)</option>
+                                <option value="4">Nível 4 (Bom)</option>
+                                <option value="3">Nível 3 (Razoável)</option>
+                                <option value="2">Nível 2 (Baixo)</option>
+                                <option value="1">Nível 1 (Crítico)</option>
+                            </select>
+                        </div>
+                        <!-- Botão Limpar -->
+                        <div class="col-md-2 col-12 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="clearEvaluationFilters()" title="Limpar todos os filtros">
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Busca por Termo -->
+                    <div class="row g-2 align-items-center mt-1">
+                        <div class="col-12">
+                            <input type="text" id="filterEvalKeyword" class="form-control form-control-sm" placeholder="🔍 Buscar por termo na dificuldade relatada ou estratégia da IA..." oninput="applyEvaluationFilters()">
+                        </div>
+                    </div>
+                    <!-- Status do Filtro -->
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <span class="small text-muted" id="evalCountStatus">
+                            Exibindo todas as <strong>{{ evaluations|length }}</strong> autoavaliações
+                        </span>
+                        <span class="badge bg-success text-white small" id="activeEvalFilterBadge" style="display: none;">
+                            Filtros aplicados
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Tabela de Autoavaliações -->
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Autoavaliações Metacognitivas</h5>
+                            <small class="text-muted">Percepção de autonomia, compreensão e estratégias relatadas pelos estudantes.</small>
+                        </div>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-hover align-middle mb-0" id="evaluationsTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Estudante</th>
-                                    <th>Atividade</th>
-                                    <th>Autonomia</th>
-                                    <th>Compreensão</th>
-                                    <th>Dificuldade Relatada</th>
-                                    <th>Estratégia Utilizada</th>
+                                    <th class="ps-4" style="width: 12%;">Data/Hora</th>
+                                    <th style="width: 16%;">Estudante</th>
+                                    <th style="width: 16%;">Atividade</th>
+                                    <th style="width: 12%;">Autonomia</th>
+                                    <th style="width: 14%;">Compreensão</th>
+                                    <th style="width: 20%;">Dificuldade Enfrentada</th>
+                                    <th class="pe-4 text-center" style="width: 10%;">Ação</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% if evaluations %}
                                     {% for ev in evaluations %}
-                                    <tr>
-                                        <td><strong>{{ student_map.get(ev.user_id, 'Estudante ' ~ ev.user_id) }}</strong></td>
-                                        <td>{{ activity_map.get(ev.activity_id, 'Geral') }}</td>
+                                    <tr class="evaluation-row"
+                                        data-student-id="{{ ev.user_id }}"
+                                        data-activity-id="{{ ev.activity_id }}"
+                                        data-autonomy="{{ 'true' if ev.solved_alone else 'false' }}"
+                                        data-comprehension="{{ ev.comprehension_level }}"
+                                        data-search-text="{{ student_map.get(ev.user_id, '') }} {{ activity_map.get(ev.activity_id, '') }} {{ ev.main_difficulty or '' }} {{ ev.helpful_strategy or '' }}">
+                                        <td class="ps-4 text-muted small">
+                                            {{ ev.created_at.strftime('%d/%m %H:%M') if ev.created_at else '-' }}
+                                        </td>
+                                        <td>
+                                            <strong class="text-dark">{{ student_map.get(ev.user_id, 'Estudante ' ~ ev.user_id) }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">{{ activity_map.get(ev.activity_id, 'Geral') }}</span>
+                                        </td>
                                         <td>
                                             {% if ev.solved_alone %}
-                                                <span class="badge bg-success">Sim (Autônomo)</span>
+                                                <span class="badge bg-success">Autônomo</span>
                                             {% else %}
                                                 <span class="badge bg-warning text-dark">Com Ajuda</span>
                                             {% endif %}
                                         </td>
-                                        <td><span class="badge bg-info text-dark">{{ ev.comprehension_level }}/5</span></td>
-                                        <td><small>{{ ev.main_difficulty or 'Não relatou' }}</small></td>
-                                        <td><small>{{ ev.helpful_strategy or 'Não relatou' }}</small></td>
+                                        <td>
+                                            <span class="badge bg-info text-dark">{{ ev.comprehension_level }}/5</span>
+                                            <small class="text-muted ms-1">Conf: {{ ev.confidence_level }}/5</small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted d-block text-truncate" style="max-width: 200px;" title="{{ ev.main_difficulty or 'Não relatou' }}">{{ ev.main_difficulty or 'Não relatou' }}</small>
+                                        </td>
+                                        <td class="pe-4 text-center">
+                                            <button type="button" class="btn btn-outline-success btn-sm px-2 py-1 btn-view-eval"
+                                                    data-student="{{ student_map.get(ev.user_id, 'Estudante ' ~ ev.user_id) }}"
+                                                    data-activity="{{ activity_map.get(ev.activity_id, 'Geral') }}"
+                                                    data-date="{{ ev.created_at.strftime('%d/%m/%Y às %H:%M') if ev.created_at else '-' }}"
+                                                    data-autonomy="{{ 'Autônomo com IA' if ev.solved_alone else 'Com auxílio adicional' }}"
+                                                    data-autonomy-badge="{{ 'bg-success' if ev.solved_alone else 'bg-warning text-dark' }}"
+                                                    data-comp="{{ ev.comprehension_level }}"
+                                                    data-conf="{{ ev.confidence_level }}">
+                                                👁️ Ver
+                                            </button>
+                                            <!-- Textos completos em elementos seguros para o modal -->
+                                            <div class="d-none full-difficulty">{{ ev.main_difficulty or 'Nenhuma dificuldade relatada.' }}</div>
+                                            <div class="d-none full-strategy">{{ ev.helpful_strategy or 'Nenhuma estratégia relatada.' }}</div>
+                                        </td>
                                     </tr>
                                     {% endfor %}
+                                    <tr id="noResultsEvalRow" style="display: none;">
+                                        <td colspan="7" class="text-center text-muted py-5">
+                                            🔍 Nenhuma autoavaliação encontrada para os filtros selecionados.
+                                        </td>
+                                    </tr>
                                 {% else %}
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">Nenhuma autoavaliação submetida ainda.</td>
+                                        <td colspan="7" class="text-center text-muted py-5">Nenhuma autoavaliação submetida ainda.</td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -251,23 +624,295 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ABA 4: Análise Pedagógica & Gráficos -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 bg-white">
+                            <div class="card-header bg-white py-3 px-4 fw-bold text-dark border-bottom">
+                                📊 Distribuição dos Níveis de Suporte da IA (1 ao 6)
+                            </div>
+                            <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 300px;">
+                                <canvas id="chartHelpLevels"></canvas>
+                            </div>
+                            <div class="card-footer bg-light px-4 py-2 small text-muted border-0">
+                                Proporção de mensagens geradas em cada nível de rigor pedagógico.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 bg-white">
+                            <div class="card-header bg-white py-3 px-4 fw-bold text-dark border-bottom">
+                                📈 Percepção Média dos Alunos (Escala 1 a 5)
+                            </div>
+                            <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 300px;">
+                                <canvas id="chartSelfEval"></canvas>
+                            </div>
+                            <div class="card-footer bg-light px-4 py-2 small text-muted border-0">
+                                Média dos níveis de compreensão e confiança apontados na autoavaliação.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Script de Gestão das Réguas e Gráficos -->
+    <!-- Modal de Criação de Atividade -->
+    <div class="modal fade" id="modalNovaAtividade" tabindex="-1" aria-labelledby="modalNovaAtividadeLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <form action="/teacher/activity/create" method="post">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold" id="modalNovaAtividadeLabel">➕ Cadastrar Nova Atividade</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold">Título da Atividade</label>
+                                <input type="text" name="title" class="form-control" required placeholder="Ex: Estrutura Repetitiva While">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Disciplina</label>
+                                <input type="text" name="subject" class="form-control" required placeholder="Ex: Algoritmos I">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Nível Socrático Inicial da IA</label>
+                                <select name="max_help_level" class="form-select">
+                                    <option value="1">Nível 1 - Socrático Estrito (Apenas perguntas orientadoras)</option>
+                                    <option value="2">Nível 2 - Pistas Conceituais (Foco na teoria)</option>
+                                    <option value="3">Nível 3 - Pseudocódigo (Estrutura e modelo genérico)</option>
+                                    <option value="4">Nível 4 - Explicação Guiada (Passo a passo lógico)</option>
+                                    <option value="5">Nível 5 - Demonstração Prática (Trechos de código)</option>
+                                    <option value="6" selected>Nível 6 - ChatGPT Irrestrito (Código e solução completa)</option>
+                                </select>
+                                <div class="form-text">Você poderá ajustar a régua socrática desta atividade a qualquer momento após criá-la.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Descrição / Enunciado</label>
+                                <textarea name="description" class="form-control" rows="4" required placeholder="Descreva o problema ou enunciado da tarefa que o estudante deverá resolver..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary fw-bold px-4">Salvar Atividade</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalhes do Diálogo Socrático para Análise -->
+    <div class="modal fade" id="modalDialogoDetalhe" tabindex="-1" aria-labelledby="modalDialogoDetalheLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="modalDialogoDetalheLabel">💬 Análise do Diálogo Socrático</h5>
+                        <small class="text-white-50">
+                            Estudante: <strong id="modalDetailStudent" class="text-white"></strong> | 
+                            Atividade: <strong id="modalDetailActivity" class="text-white"></strong>
+                        </small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <!-- Informações e Metadados -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-2 bg-white rounded border gap-2">
+                        <div>
+                            <span class="small text-muted me-2">Rigor Pedagógico:</span>
+                            <span id="modalDetailBadge" class="badge bg-primary">Nível 1</span>
+                        </div>
+                        <div class="text-muted small">
+                            <span id="modalDetailDate" class="me-3"></span>
+                            <span id="modalDetailTokens" class="badge bg-light text-dark border"></span>
+                        </div>
+                    </div>
+
+                    <!-- Pergunta / Dúvida do Estudante -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-primary text-white py-2 fw-semibold">
+                            👤 Mensagem / Código Enviado pelo Estudante:
+                        </div>
+                        <div class="card-body bg-white">
+                            <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit; font-size: 0.95rem;" id="modalDetailPrompt"></pre>
+                        </div>
+                    </div>
+
+                    <!-- Resposta do Tutor Socrático -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white py-2 fw-semibold">
+                            🤖 Intervenção do Tutor Socrático (IA):
+                        </div>
+                        <div class="card-body bg-white">
+                            <div style="white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;" id="modalDetailResponse"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalhes da Autoavaliação Metacognitiva -->
+    <div class="modal fade" id="modalEvalDetalhe" tabindex="-1" aria-labelledby="modalEvalDetalheLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="modalEvalDetalheLabel">📝 Análise da Autoavaliação</h5>
+                        <small class="text-white-50">
+                            Estudante: <strong id="modalEvalStudent" class="text-white"></strong> | 
+                            Atividade: <strong id="modalEvalActivity" class="text-white"></strong>
+                        </small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <!-- Resumo dos Indicadores -->
+                    <div class="card border-0 shadow-sm p-3 bg-white mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Data de Conclusão:</span>
+                            <strong id="modalEvalDate" class="small text-dark"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Autonomia no Exercício:</span>
+                            <span id="modalEvalAutonomy" class="badge"></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Nível de Compreensão:</span>
+                            <span id="modalEvalComp" class="badge bg-primary"></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Nível de Confiança:</span>
+                            <span id="modalEvalConf" class="badge bg-info text-dark"></span>
+                        </div>
+                    </div>
+
+                    <!-- Dificuldade Relatada -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white py-2 fw-semibold text-danger small border-bottom">
+                            ⚠️ Principal Dificuldade Enfrentada:
+                        </div>
+                        <div class="card-body bg-white py-3">
+                            <p class="mb-0 text-dark small" id="modalEvalDifficulty" style="white-space: pre-wrap; line-height: 1.5;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Estratégia da IA mais Útil -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-2 fw-semibold text-success small border-bottom">
+                            💡 Estratégia mais Útil do Tutor Socrático:
+                        </div>
+                        <div class="card-body bg-white py-3">
+                            <p class="mb-0 text-dark small" id="modalEvalStrategy" style="white-space: pre-wrap; line-height: 1.5;"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Interação, Filtros e Gráficos -->
     <script>
-        const descriptions = {
-            1: "Nível 1: Socrático Estrito (Apenas perguntas orientadoras)",
-            2: "Nível 2: Pistas Conceituais (Foco na teoria)",
-            3: "Nível 3: Pistas Estruturais (Pseudocódigo e modelo)",
-            4: "Nível 4: Explicação Guiada (Passo a passo lógico)",
-            5: "Nível 5: Demonstração Controlada (Trechos de código)",
-            6: "Nível 6: ChatGPT Irrestrito (Respostas e código completo)"
+        const levelMetadata = {
+            1: {
+                name: "Nível 1 - Socrático Estrito",
+                short: "Estrito",
+                colorClass: "bg-danger text-white",
+                borderColor: "#dc3545",
+                description: "Apenas perguntas reflexivas orientadoras. Proibido fornecer código, sintaxe ou solução direta."
+            },
+            2: {
+                name: "Nível 2 - Pistas Conceituais",
+                short: "Conceitual",
+                colorClass: "bg-warning text-dark",
+                borderColor: "#ffc107",
+                description: "Foco na teoria e lógica conceitual subjacente, sem dar a sintaxe ou código pronto da atividade."
+            },
+            3: {
+                name: "Nível 3 - Pistas Estruturais",
+                short: "Pseudocódigo",
+                colorClass: "bg-info text-dark",
+                borderColor: "#0dcaf0",
+                description: "Fornece pseudocódigo ou estrutura genérica de modelo, sem a implementação final completa."
+            },
+            4: {
+                name: "Nível 4 - Explicação Guiada",
+                short: "Guia Lógico",
+                colorClass: "bg-primary text-white",
+                borderColor: "#0d6efd",
+                description: "Passo a passo detalhado do raciocínio lógico, instigando o estudante a implementar o código."
+            },
+            5: {
+                name: "Nível 5 - Demonstração Controlada",
+                short: "Exemplo",
+                colorClass: "bg-dark text-white",
+                borderColor: "#212529",
+                description: "Exemplo de código pontual no trecho específico de dificuldade do aluno, sem resolver tudo por ele."
+            },
+            6: {
+                name: "Nível 6 - Modo Livre (ChatGPT)",
+                short: "Livre",
+                colorClass: "bg-success text-white",
+                borderColor: "#198754",
+                description: "Solução irrestrita: fornece código completo, correção direta e respostas amplas para o estudante."
+            }
         };
 
-        function updateBadgeText(actId, val) {
-            document.getElementById(`badge-level-${actId}`).innerText = `Nível ${val}`;
-            document.getElementById(`desc-level-${actId}`).innerText = descriptions[val];
+        function updateRulerUI(actId, val) {
+            val = parseInt(val);
+            const meta = levelMetadata[val];
+            if (!meta) return;
+
+            const slider = document.getElementById(`range-level-${actId}`);
+            if (slider && parseInt(slider.value) !== val) {
+                slider.value = val;
+            }
+
+            const badge = document.getElementById(`badge-level-${actId}`);
+            if (badge) {
+                badge.className = `badge fs-6 px-3 py-2 rounded-pill shadow-sm ${meta.colorClass}`;
+                badge.innerText = meta.name;
+            }
+
+            const descBox = document.getElementById(`desc-box-${actId}`);
+            const descTitle = document.getElementById(`desc-title-${actId}`);
+            const descText = document.getElementById(`desc-text-${actId}`);
+            if (descBox && descTitle && descText) {
+                descBox.style.borderLeftColor = meta.borderColor;
+                descTitle.innerText = `💡 Diretriz Pedagógica da IA (${meta.name}):`;
+                descText.innerText = meta.description;
+            }
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`step-btn-${actId}-${i}`);
+                if (btn) {
+                    if (i === val) {
+                        btn.className = `btn btn-sm w-100 p-1 step-btn active-step shadow-sm ${levelMetadata[i].colorClass}`;
+                    } else {
+                        btn.className = 'btn btn-sm w-100 p-1 step-btn text-dark';
+                    }
+                }
+            }
+        }
+
+        function onSliderInput(actId, val) {
+            updateRulerUI(actId, val);
+        }
+
+        function setRulerLevel(actId, val) {
+            updateRulerUI(actId, val);
+            sendLevelUpdate(actId, val);
         }
 
         async function sendLevelUpdate(actId, val) {
@@ -280,30 +925,232 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     const toast = document.getElementById('toastAlert');
-                    document.getElementById('toastMessage').innerText = `Atividade #${actId} atualizada para o ${descriptions[val]}!`;
-                    toast.classList.replace('hide', 'show');
+                    const meta = levelMetadata[parseInt(val)];
+                    document.getElementById('toastMessage').innerHTML = `Régua atualizada: <strong>${meta.name}</strong> salvo com sucesso em tempo real!`;
+                    toast.classList.remove('hide');
+                    toast.classList.add('show');
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.classList.add('hide');
+                    }, 3500);
                 }
             } catch (err) {
                 console.error('Erro ao atualizar nível socrático:', err);
             }
         }
 
-        // Inicializar descrições das réguas
+        // Filtro em tempo real de tabelas genéricas
+        function filterTable(tableId, query) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            query = query.toLowerCase();
+
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].innerText.toLowerCase();
+                rows[i].style.display = text.includes(query) ? '' : 'none';
+            }
+        }
+
+        // Filtro combinado avançado para análise dos Diálogos Socráticos
+        function applyInteractionsFilters() {
+            const studentVal = document.getElementById('filterStudent').value;
+            const activityVal = document.getElementById('filterActivity').value;
+            const levelVal = document.getElementById('filterLevel').value;
+            const keywordVal = (document.getElementById('filterKeyword').value || '').toLowerCase().trim();
+
+            const rows = document.querySelectorAll('#interactionsTable tbody tr.interaction-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowStudent = row.getAttribute('data-student-id');
+                const rowActivity = row.getAttribute('data-activity-id');
+                const rowLevel = row.getAttribute('data-level');
+                const rowText = (row.getAttribute('data-search-text') || '').toLowerCase();
+
+                const matchStudent = !studentVal || rowStudent === studentVal;
+                const matchActivity = !activityVal || rowActivity === activityVal;
+                const matchLevel = !levelVal || rowLevel === levelVal;
+                const matchKeyword = !keywordVal || rowText.includes(keywordVal);
+
+                if (matchStudent && matchActivity && matchLevel && matchKeyword) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const statusEl = document.getElementById('filterCountStatus');
+            if (statusEl) {
+                const total = rows.length;
+                statusEl.innerHTML = `Exibindo <strong>${visibleCount}</strong> de <strong>${total}</strong> diálogos encontrados`;
+            }
+
+            const emptyRow = document.getElementById('noResultsRow');
+            if (emptyRow) {
+                emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+            }
+
+            const hasActive = studentVal || activityVal || levelVal || keywordVal;
+            const badgeEl = document.getElementById('activeFilterBadge');
+            if (badgeEl) {
+                badgeEl.style.display = hasActive ? 'inline-block' : 'none';
+            }
+        }
+
+        function clearInteractionsFilters() {
+            document.getElementById('filterStudent').value = '';
+            document.getElementById('filterActivity').value = '';
+            document.getElementById('filterLevel').value = '';
+            document.getElementById('filterKeyword').value = '';
+            applyInteractionsFilters();
+        }
+
+        // Listener para abrir o Modal de Análise Detalhada do Diálogo
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-view-dialogue');
+            if (!btn) return;
+
+            const row = btn.closest('tr');
+            const student = btn.getAttribute('data-student');
+            const activity = btn.getAttribute('data-activity');
+            const level = btn.getAttribute('data-level');
+            const date = btn.getAttribute('data-date');
+            const tokens = btn.getAttribute('data-tokens');
+            const pTokens = btn.getAttribute('data-prompt-tokens');
+            const cTokens = btn.getAttribute('data-comp-tokens');
+            const promptText = row.querySelector('.full-prompt').innerText;
+            const responseText = row.querySelector('.full-response').innerText;
+
+            document.getElementById('modalDetailStudent').innerText = student;
+            document.getElementById('modalDetailActivity').innerText = activity;
+            document.getElementById('modalDetailDate').innerText = date;
+            document.getElementById('modalDetailTokens').innerText = `Tokens: ${tokens} (Prompt: ${pTokens} | Resposta: ${cTokens})`;
+
+            const meta = levelMetadata[parseInt(level)] || { name: `Nível ${level}`, colorClass: 'bg-primary text-white' };
+            const badge = document.getElementById('modalDetailBadge');
+            badge.className = `badge ${meta.colorClass}`;
+            badge.innerText = meta.name;
+
+            document.getElementById('modalDetailPrompt').innerText = promptText;
+            document.getElementById('modalDetailResponse').innerText = responseText;
+
+            const modal = new bootstrap.Modal(document.getElementById('modalDialogoDetalhe'));
+            modal.show();
+        });
+
+        // Filtro combinado avançado para Autoavaliações
+        function applyEvaluationFilters() {
+            const studentVal = document.getElementById('filterEvalStudent').value;
+            const activityVal = document.getElementById('filterEvalActivity').value;
+            const autonomyVal = document.getElementById('filterEvalAutonomy').value;
+            const compVal = document.getElementById('filterEvalComprehension').value;
+            const keywordVal = (document.getElementById('filterEvalKeyword').value || '').toLowerCase().trim();
+
+            const rows = document.querySelectorAll('#evaluationsTable tbody tr.evaluation-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowStudent = row.getAttribute('data-student-id');
+                const rowActivity = row.getAttribute('data-activity-id');
+                const rowAutonomy = row.getAttribute('data-autonomy');
+                const rowComp = row.getAttribute('data-comprehension');
+                const rowText = (row.getAttribute('data-search-text') || '').toLowerCase();
+
+                const matchStudent = !studentVal || rowStudent === studentVal;
+                const matchActivity = !activityVal || rowActivity === activityVal;
+                const matchAutonomy = !autonomyVal || rowAutonomy === autonomyVal;
+                const matchComp = !compVal || rowComp === compVal;
+                const matchKeyword = !keywordVal || rowText.includes(keywordVal);
+
+                if (matchStudent && matchActivity && matchAutonomy && matchComp && matchKeyword) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const statusEl = document.getElementById('evalCountStatus');
+            if (statusEl) {
+                const total = rows.length;
+                statusEl.innerHTML = `Exibindo <strong>${visibleCount}</strong> de <strong>${total}</strong> autoavaliações encontradas`;
+            }
+
+            const emptyRow = document.getElementById('noResultsEvalRow');
+            if (emptyRow) {
+                emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+            }
+
+            const hasActive = studentVal || activityVal || autonomyVal || compVal || keywordVal;
+            const badgeEl = document.getElementById('activeEvalFilterBadge');
+            if (badgeEl) {
+                badgeEl.style.display = hasActive ? 'inline-block' : 'none';
+            }
+        }
+
+        function clearEvaluationFilters() {
+            document.getElementById('filterEvalStudent').value = '';
+            document.getElementById('filterEvalActivity').value = '';
+            document.getElementById('filterEvalAutonomy').value = '';
+            document.getElementById('filterEvalComprehension').value = '';
+            document.getElementById('filterEvalKeyword').value = '';
+            applyEvaluationFilters();
+        }
+
+        // Listener para abrir o Modal de Detalhes da Autoavaliação
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-view-eval');
+            if (!btn) return;
+
+            const row = btn.closest('tr');
+            const student = btn.getAttribute('data-student');
+            const activity = btn.getAttribute('data-activity');
+            const date = btn.getAttribute('data-date');
+            const autonomy = btn.getAttribute('data-autonomy');
+            const autonomyBadge = btn.getAttribute('data-autonomy-badge');
+            const comp = btn.getAttribute('data-comp');
+            const conf = btn.getAttribute('data-conf');
+            const difficulty = row.querySelector('.full-difficulty').innerText;
+            const strategy = row.querySelector('.full-strategy').innerText;
+
+            document.getElementById('modalEvalStudent').innerText = student;
+            document.getElementById('modalEvalActivity').innerText = activity;
+            document.getElementById('modalEvalDate').innerText = date;
+
+            const autoBadgeEl = document.getElementById('modalEvalAutonomy');
+            autoBadgeEl.className = `badge ${autonomyBadge}`;
+            autoBadgeEl.innerText = autonomy;
+
+            document.getElementById('modalEvalComp').innerText = `${comp} de 5`;
+            document.getElementById('modalEvalConf').innerText = `${conf} de 5`;
+
+            document.getElementById('modalEvalDifficulty').innerText = difficulty;
+            document.getElementById('modalEvalStrategy').innerText = strategy;
+
+            const modal = new bootstrap.Modal(document.getElementById('modalEvalDetalhe'));
+            modal.show();
+        });
+
+        // Inicializar todas as réguas ao carregar a página
         document.addEventListener('DOMContentLoaded', () => {
             {% for act in activities %}
-                updateBadgeText({{ act.id }}, {{ act.max_help_level }});
+                updateRulerUI({{ act.id }}, {{ act.max_help_level }});
             {% endfor %}
         });
 
         // Gráficos Chart.js
+        let chartHelp, chartEval;
+
         const ctxHelp = document.getElementById('chartHelpLevels').getContext('2d');
-        new Chart(ctxHelp, {
+        chartHelp = new Chart(ctxHelp, {
             type: 'doughnut',
             data: {
                 labels: ['Nível 1 (Estrito)', 'Nível 2 (Conceitual)', 'Nível 3 (Pseudocódigo)', 'Nível 4 (Guia)', 'Nível 5 (Exemplo)', 'Nível 6 (Irrestrito)'],
                 datasets: [{
                     data: {{ level_counts|tojson }},
-                    backgroundColor: ['#0d6efd', '#198754', '#0dcaf0', '#ffc107', '#fd7e14', '#dc3545']
+                    backgroundColor: ['#dc3545', '#ffc107', '#0dcaf0', '#0d6efd', '#212529', '#198754']
                 }]
             },
             options: {
@@ -314,7 +1161,7 @@
         });
 
         const ctxEval = document.getElementById('chartSelfEval').getContext('2d');
-        new Chart(ctxEval, {
+        chartEval = new Chart(ctxEval, {
             type: 'bar',
             data: {
                 labels: ['Compreensão Média', 'Confiança Média'],
@@ -330,6 +1177,15 @@
                 plugins: { legend: { display: false } }
             }
         });
+
+        // Redimensiona os gráficos quando a aba de análise for ativada
+        const analyticsTab = document.getElementById('analytics-tab');
+        if (analyticsTab) {
+            analyticsTab.addEventListener('shown.bs.tab', () => {
+                if (chartHelp) chartHelp.resize();
+                if (chartEval) chartEval.resize();
+            });
+        }
     </script>
 </body>
 </html>

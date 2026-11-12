@@ -47,3 +47,25 @@ def login(
 def logout(request: Request):
     request.session.clear()
     return responses.RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.get("/sobre")
+def about_page(request: Request):
+    user_role = request.session.get("user_role")
+    user_name = request.session.get("user_name")
+    back_url = "/login"
+    if user_role == "admin":
+        back_url = "/admin/dashboard"
+    elif user_role == "docente":
+        back_url = "/teacher/dashboard"
+    elif user_role == "estudante":
+        back_url = "/student/dashboard"
+
+    return templates.TemplateResponse(
+        request=request,
+        name="sobre.html",
+        context={
+            "user_name": user_name,
+            "user_role": user_role,
+            "back_url": back_url
+        }
+    )

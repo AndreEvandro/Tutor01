@@ -2,37 +2,238 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tutor Socrático IA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            max-width: 440px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 80px rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-container {
+            width: 84px;
+            height: 84px;
+            margin: 0 auto;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.35);
+        }
+        .logo-container svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #4f46e5;
+        }
+        .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.2);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            border: 0;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+            color: #ffffff;
+        }
+        .demo-pill {
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #334155;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .demo-pill:hover {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
-<body class="bg-light d-flex align-items-center justify-content-center vh-100">
-    <div class="card shadow p-4 style="max-width: 400px; width: 100%;">
-        <h3 class="text-center text-primary fw-bold mb-3">Tutor Socrático</h3>
-        <p class="text-center text-muted small">Acesse com uma das contas de teste</p>
+<body>
+
+    <div class="login-card p-4 p-md-5">
         
+        <!-- Ícone / Logo do Tutor Socrático -->
+        <div class="text-center mb-3">
+            <div class="logo-container mb-3">
+                <svg viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="socraticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#4f46e5" />
+                            <stop offset="50%" stop-color="#06b6d4" />
+                            <stop offset="100%" stop-color="#3b82f6" />
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="2.5" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    <circle cx="50" cy="50" r="48" fill="#0f172a" stroke="url(#socraticGrad)" stroke-width="2.5" />
+                    <circle cx="50" cy="50" r="42" fill="#1e293b" opacity="0.6" />
+                    <rect x="24" y="72" width="52" height="4" rx="2" fill="url(#socraticGrad)" />
+                    <rect x="28" y="68" width="44" height="2.5" rx="1" fill="#94a3b8" opacity="0.8" />
+                    <rect x="30" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+                    <rect x="47.75" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+                    <rect x="65.5" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+                    <rect x="27" y="40" width="46" height="3" rx="1" fill="#cbd5e1" />
+                    <polygon points="50,18 25,37 75,37" fill="url(#socraticGrad)" opacity="0.35" />
+                    <polyline points="25,37 50,18 75,37" fill="none" stroke="url(#socraticGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="50" cy="22" r="3.5" fill="#38bdf8" filter="url(#glow)" />
+                    <circle cx="38" cy="30" r="2.5" fill="#60a5fa" />
+                    <circle cx="62" cy="30" r="2.5" fill="#818cf8" />
+                    <circle cx="50" cy="34" r="2.5" fill="#a78bfa" />
+                    <line x1="50" y1="22" x2="38" y2="30" stroke="#38bdf8" stroke-width="1.2" opacity="0.8" />
+                    <line x1="50" y1="22" x2="62" y2="30" stroke="#38bdf8" stroke-width="1.2" opacity="0.8" />
+                    <line x1="38" y1="30" x2="50" y2="34" stroke="#818cf8" stroke-width="1.2" opacity="0.8" />
+                    <line x1="62" y1="30" x2="50" y2="34" stroke="#818cf8" stroke-width="1.2" opacity="0.8" />
+                    <path d="M50 48 L52 53 L57 55 L52 57 L50 62 L48 57 L43 55 L48 53 Z" fill="#38bdf8" filter="url(#glow)" />
+                </svg>
+            </div>
+            <h4 class="fw-bold text-dark mb-1">Tutor Socrático IA</h4>
+            <p class="text-muted small mb-0">Ambiente de Aprendizagem Guiada & Metacognição</p>
+        </div>
+
+        <!-- Alerta de Erro de Autenticação -->
         {% if error %}
-        <div class="alert alert-danger p-2 small text-center">{{ error }}</div>
+        <div class="alert alert-danger py-2 px-3 small border-0 shadow-sm d-flex align-items-center gap-2 mb-3" role="alert">
+            <span>⚠️</span>
+            <div>{{ error }}</div>
+        </div>
         {% endif %}
 
+        <!-- Formulário de Login -->
         <form action="/login" method="post">
             <div class="mb-3">
-                <label class="form-label">E-mail</label>
-                <input type="email" name="email" class="form-control" placeholder="admin@tutor.com" required>
+                <label class="form-label small fw-bold text-muted mb-1">E-mail Institucional</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted">📧</span>
+                    <input type="email" id="emailInput" name="email" class="form-control border-start-0 ps-0" placeholder="seu-email@tutor.com" required autocomplete="email">
+                </div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Senha</label>
-                <input type="password" name="password" class="form-control" placeholder="******" required>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-muted mb-1">Senha de Acesso</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted">🔒</span>
+                    <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 ps-0" placeholder="••••••••" required autocomplete="current-password">
+                    <button class="btn btn-outline-secondary border-start-0 bg-light text-muted" type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="Mostrar/Ocultar senha">
+                        👁️
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+
+            <button type="submit" class="btn btn-login w-100 shadow-sm">
+                Entrar na Plataforma
+            </button>
         </form>
 
-        <hr>
-        <div class="small text-muted">
-            <strong>Contas de Teste:</strong><br>
-            • Admin: <code>admin@tutor.com</code> | <code>admin123</code><br>
-            • Docente: <code>docente@tutor.com</code> | <code>docente123</code><br>
-            • Estudante: <code>aluno@tutor.com</code> | <code>aluno123</code>
+        <hr class="my-4 text-muted opacity-25">
+
+        <!-- Preenchimento Rápido para Demonstração (1 Clique) -->
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small fw-bold text-uppercase text-muted" style="font-size: 0.72rem;">
+                    🚀 Acesso Rápido de Demonstração
+                </span>
+                <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">1 clique</span>
+            </div>
+            
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="demo-pill" onclick="fillCredentials('aluno@tutor.com', 'aluno123')">
+                    <span>🎒</span>
+                    <span>Aluno</span>
+                </button>
+                <button type="button" class="demo-pill" onclick="fillCredentials('docente@tutor.com', 'docente123')">
+                    <span>🎓</span>
+                    <span>Docente</span>
+                </button>
+                <button type="button" class="demo-pill" onclick="fillCredentials('admin@tutor.com', 'admin123')">
+                    <span>👑</span>
+                    <span>Admin</span>
+                </button>
+            </div>
         </div>
+
+        <div class="text-center mt-4">
+            <a href="/sobre" class="text-decoration-none small text-primary fw-semibold d-inline-flex align-items-center gap-1 mb-2">
+                <span>ℹ️</span> <span>Sobre o Projeto & Autoria Acadêmica</span>
+            </a>
+            <br>
+            <small class="text-muted" style="font-size: 0.72rem;">
+                © 2026 Tutor Socrático IA • SIN5006 - Inteligência Computacional
+            </small>
+        </div>
+
     </div>
+
+    <!-- Script de Interação: 1-Click Fill & Toggle Senha -->
+    <script>
+        function fillCredentials(email, pass) {
+            const emailInput = document.getElementById('emailInput');
+            const passInput = document.getElementById('passwordInput');
+            emailInput.value = email;
+            passInput.value = pass;
+            
+            // Efeito visual sutil de preenchimento
+            emailInput.classList.add('bg-light');
+            passInput.classList.add('bg-light');
+            setTimeout(() => {
+                emailInput.classList.remove('bg-light');
+                passInput.classList.remove('bg-light');
+            }, 300);
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('passwordInput');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggleBtn.innerText = '🙈';
+            } else {
+                passInput.type = 'password';
+                toggleBtn.innerText = '👁️';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="socraticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0.8" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Fundo Circular com Borda Sutil -->
+  <circle cx="50" cy="50" r="48" fill="#0f172a" stroke="url(#socraticGrad)" stroke-width="2.5" />
+  
+  <!-- Círculo Interno com Efeito Radial -->
+  <circle cx="50" cy="50" r="42" fill="#1e293b" opacity="0.6" />
+
+  <!-- Pilares Filosóficos Socráticos (Inspiração Grega) -->
+  <!-- Base do Templo -->
+  <rect x="24" y="72" width="52" height="4" rx="2" fill="url(#socraticGrad)" />
+  <rect x="28" y="68" width="44" height="2.5" rx="1" fill="#94a3b8" opacity="0.8" />
+
+  <!-- 3 Colunas Socráticas -->
+  <rect x="30" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+  <rect x="47.75" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+  <rect x="65.5" y="44" width="4.5" height="23" rx="1.5" fill="url(#socraticGrad)" />
+
+  <!-- Capitel / Arquítrabe das Colunas -->
+  <rect x="27" y="40" width="46" height="3" rx="1" fill="#cbd5e1" />
+
+  <!-- Cúpula / Frontão em Forma de Rede Neural e Conhecimento -->
+  <polygon points="50,18 25,37 75,37" fill="url(#socraticGrad)" opacity="0.35" />
+  <polyline points="25,37 50,18 75,37" fill="none" stroke="url(#socraticGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Nós Neurais de Inteligência Artificial (Rede no Ápice) -->
+  <circle cx="50" cy="22" r="3.5" fill="#38bdf8" filter="url(#glow)" />
+  <circle cx="38" cy="30" r="2.5" fill="#60a5fa" />
+  <circle cx="62" cy="30" r="2.5" fill="#818cf8" />
+  <circle cx="50" cy="34" r="2.5" fill="#a78bfa" />
+
+  <!-- Conexões Sinápticas da IA -->
+  <line x1="50" y1="22" x2="38" y2="30" stroke="#38bdf8" stroke-width="1.2" opacity="0.8" />
+  <line x1="50" y1="22" x2="62" y2="30" stroke="#38bdf8" stroke-width="1.2" opacity="0.8" />
+  <line x1="38" y1="30" x2="50" y2="34" stroke="#818cf8" stroke-width="1.2" opacity="0.8" />
+  <line x1="62" y1="30" x2="50" y2="34" stroke="#818cf8" stroke-width="1.2" opacity="0.8" />
+
+  <!-- Brilho / Centelha da Sabedoria Socrática (Ícone Central) -->
+  <path d="M50 48 L52 53 L57 55 L52 57 L50 62 L48 57 L43 55 L48 53 Z" fill="#38bdf8" filter="url(#glow)" />
+</svg>
