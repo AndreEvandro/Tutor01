@@ -108,7 +108,11 @@ def send_student_message(
         )
 
     controller = PedagogyController(max_help_level=activity.max_help_level)
-    result = controller.process_interaction(student_prompt=student_prompt, help_level=activity.max_help_level)
+    result = controller.process_interaction(
+        student_prompt=student_prompt,
+        help_level=activity.max_help_level,
+        activity_description=f"{activity.title} - {activity.description}"
+    )
 
     new_interaction = Interaction(
         user_id=user_id,
